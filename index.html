@@ -1,0 +1,1332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Milele OS — My Life, Organized</title>
+<meta name="theme-color" content="#090F15">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   MILELE OS v2 — editorial edition
+   Palette: Arctic · Slopes · Après Ski · Mountainside · Midnight
+   Type: Playfair Display (display, roman + italic) · Lora (body)
+   ============================================================ */
+:root{
+  --midnight:#090F15;
+  --mountain:#262E36;
+  --apres:#6C6D74;
+  --slopes:#B3B7BA;
+  --arctic:#D3D1CE;
+  --paper:#D3D1CE;          /* page */
+  --card:#E3E1DD;           /* raised light card */
+  --card-2:#EBEAE6;         /* lighter still */
+  --ink:#090F15;
+  --line:rgba(9,15,21,.14);
+  --line-l:rgba(211,209,206,.22);
+
+  --r-lg:26px;
+  --r-md:18px;
+  --shadow:0 10px 28px rgba(9,15,21,.12);
+  --disp:'Playfair Display',Georgia,serif;
+  --body:'Lora',Georgia,serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--body);
+  background:var(--paper);
+  color:var(--ink);
+  min-height:100vh;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+button{font-family:var(--body);border:none;background:none;cursor:pointer;color:inherit}
+:focus-visible{outline:2.5px solid var(--mountain);outline-offset:2px;border-radius:6px}
+svg{display:block;flex:0 0 auto}
+
+.app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:115px}
+@media(min-width:900px){.app{max-width:520px}}
+
+/* ---------- pages ---------- */
+.page{display:none;animation:pagein .35s ease both}
+.page.active{display:block}
+@keyframes pagein{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+
+/* ---------- display headers — "Today's / Schedule" ---------- */
+.hero{padding:56px 26px 8px}
+.hero h1{
+  font-family:var(--disp);
+  font-size:46px;line-height:1.04;font-weight:600;letter-spacing:-.01em;
+}
+.hero h1 em{font-style:italic;font-weight:500}
+.hero .sub{font-size:12.5px;margin-top:10px;letter-spacing:.04em;color:var(--apres);font-weight:500}
+.hero.on-ink{color:var(--arctic)}
+.hero.on-ink .sub{color:var(--slopes)}
+
+.ink-band{
+  background:var(--midnight);color:var(--arctic);
+  border-radius:0 0 34px 34px;
+  padding-bottom:24px;
+}
+
+/* editorial section labels */
+.section-label{
+  display:flex;justify-content:space-between;align-items:baseline;
+  padding:30px 27px 12px;
+  font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);
+}
+.section-label .more{
+  font-family:var(--disp);font-style:italic;font-size:14px;font-weight:500;
+  letter-spacing:0;text-transform:none;color:var(--apres);
+}
+
+/* italic annotation (replaces handwriting) */
+.it-note{font-family:var(--disp);font-style:italic;font-weight:500}
+
+/* refined highlight */
+.hl{background:linear-gradient(transparent 14%,rgba(179,183,186,.45) 14%,rgba(179,183,186,.45) 90%,transparent 90%);padding:0 3px}
+.on-dark .hl,.hl.dark{background:linear-gradient(transparent 14%,rgba(108,109,116,.5) 14%,rgba(108,109,116,.5) 90%,transparent 90%)}
+
+/* ---------- pills ---------- */
+.pills{display:flex;gap:8px;overflow-x:auto;padding:16px 24px 6px;scrollbar-width:none}
+.pills::-webkit-scrollbar{display:none}
+.pill{
+  flex:0 0 auto;padding:9px 17px;border-radius:999px;font-size:13px;font-weight:500;
+  border:1.2px solid rgba(9,15,21,.3);color:var(--ink);background:transparent;
+  transition:all .2s ease;white-space:nowrap;
+}
+.pill .count{opacity:.5;font-size:11.5px;margin-left:4px}
+.pill.active{background:var(--ink);color:var(--arctic);border-color:var(--ink)}
+.ink-band .pill{border-color:rgba(211,209,206,.35);color:var(--arctic)}
+.ink-band .pill.active{background:var(--arctic);color:var(--ink);border-color:var(--arctic)}
+
+.card{border-radius:var(--r-lg);padding:20px;position:relative;overflow:hidden;background:var(--card);box-shadow:var(--shadow)}
+
+/* ---------- TODAY ---------- */
+.today-head{padding:56px 26px 0}
+.today-head .greet{font-size:13px;letter-spacing:.04em;color:var(--apres)}
+.today-title-row{display:flex;align-items:flex-start;justify-content:space-between;padding:6px 26px 0}
+.today-title-row h1{font-family:var(--disp);font-size:48px;line-height:1.02;font-weight:600}
+.today-title-row h1 em{font-weight:500}
+.today-date{font-size:12.5px;letter-spacing:.04em;color:var(--apres);padding:10px 26px 0}
+.joy-chip{
+  background:var(--midnight);color:var(--arctic);border-radius:20px;padding:13px 16px;text-align:center;min-width:90px;
+  margin-top:6px;
+}
+.joy-chip .pts{font-family:var(--disp);font-size:28px;font-weight:600;line-height:1}
+.joy-chip .lbl{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--slopes);margin-top:4px}
+
+.add-circle{
+  margin:18px 26px 0;width:46px;height:46px;border-radius:50%;
+  border:1.4px solid rgba(9,15,21,.35);display:grid;place-items:center;color:var(--ink);
+}
+
+/* week strip */
+.week-strip{display:flex;gap:8px;padding:16px 24px 2px;overflow-x:auto;scrollbar-width:none}
+.week-strip::-webkit-scrollbar{display:none}
+.day-chip{
+  flex:0 0 auto;width:50px;padding:11px 0 10px;border-radius:16px;text-align:center;
+  border:1.2px solid rgba(9,15,21,.22);
+}
+.day-chip .dw{font-size:9.5px;letter-spacing:.12em;color:var(--apres)}
+.day-chip .dn{font-family:var(--disp);font-size:18px;font-weight:600;margin-top:2px}
+.day-chip.today{background:var(--midnight);border-color:var(--midnight);color:var(--arctic)}
+.day-chip.today .dw{color:var(--slopes)}
+.day-chip .dots{display:flex;gap:3px;justify-content:center;margin-top:5px}
+.day-chip .dots i{width:4.5px;height:4.5px;border-radius:50%;display:block;background:var(--apres)}
+.day-chip.today .dots i{background:var(--slopes)}
+
+/* ---------- schedule rows (photo-1 motif) ---------- */
+.sched{padding:4px 26px 0}
+.sched-row{
+  display:flex;align-items:center;gap:12px;width:100%;text-align:left;
+  padding:13.5px 0;border-bottom:1px solid var(--line);
+  transition:opacity .25s ease;
+}
+.sched-row:last-child{border-bottom:none}
+.time-pill{
+  background:rgba(179,183,186,.5);border-radius:999px;padding:4px 11px;
+  font-size:10.5px;font-weight:600;letter-spacing:.05em;flex:0 0 auto;min-width:62px;text-align:center;
+}
+.sched-row .s-title{font-size:14.5px;font-weight:500;line-height:1.3}
+.sched-row .s-meta{font-size:11px;color:var(--apres);margin-top:1px;display:flex;align-items:center;gap:5px}
+.sched-row .s-meta svg{width:11px;height:11px}
+.sched-row .s-line{flex:1;border-top:1px dotted rgba(9,15,21,.25);margin:0 2px;min-width:14px}
+.sched-row .s-check{
+  width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(9,15,21,.45);
+  display:grid;place-items:center;transition:all .2s ease;color:transparent;
+}
+.sched-row.done .s-check{background:var(--midnight);border-color:var(--midnight);color:var(--arctic)}
+.sched-row.done .s-title{text-decoration:line-through;opacity:.45}
+.sched-row.done .s-meta,.sched-row.done .time-pill{opacity:.45}
+.sched-row .s-pts{font-size:10.5px;color:var(--apres);flex:0 0 auto}
+
+/* floating +pts */
+.float-pts{
+  position:fixed;pointer-events:none;z-index:300;
+  font-family:var(--disp);font-style:italic;font-weight:600;font-size:24px;color:var(--midnight);
+  animation:floatUp 1s ease forwards;
+}
+@keyframes floatUp{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-56px)}}
+
+/* reminders */
+.stack{display:flex;flex-direction:column;gap:12px;padding:0 20px}
+.remind-card{
+  border-radius:var(--r-md);padding:16px 18px;display:flex;gap:14px;align-items:center;
+  background:var(--card);box-shadow:var(--shadow);
+}
+.remind-card.urgent{background:var(--midnight);color:var(--arctic)}
+.remind-card .r-ic{
+  width:42px;height:42px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
+  background:rgba(179,183,186,.5);color:var(--ink);
+}
+.remind-card.urgent .r-ic{background:var(--mountain);color:var(--arctic)}
+.remind-card .r-title{font-weight:600;font-size:13.5px;line-height:1.3}
+.remind-card .r-when{font-size:11.5px;color:var(--apres);margin-top:2px}
+.remind-card.urgent .r-when{color:var(--slopes)}
+.remind-card .r-days{margin-left:auto;text-align:center;flex:0 0 auto}
+.remind-card .r-days b{font-family:var(--disp);font-weight:600;font-size:21px;line-height:1;display:block}
+.remind-card .r-days small{font-size:8.5px;letter-spacing:.16em;color:var(--apres)}
+.remind-card.urgent .r-days small{color:var(--slopes)}
+
+/* ---------- CALENDAR ---------- */
+.month-nav{display:flex;align-items:baseline;justify-content:center;gap:24px;padding:10px 24px 0}
+.month-nav .mn-side{font-size:11px;letter-spacing:.16em;color:var(--apres)}
+.month-nav .mn-cur{font-family:var(--disp);font-size:21px;font-weight:600;letter-spacing:.02em}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;padding:14px 20px 4px}
+.cal-grid .dow{text-align:center;font-size:9.5px;letter-spacing:.1em;color:var(--apres);padding:6px 0;font-weight:600}
+.cal-cell{
+  aspect-ratio:1;border-radius:13px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-size:13.5px;font-weight:500;gap:3px;background:transparent;font-family:var(--disp);
+}
+.cal-cell.dim{opacity:.25}
+.cal-cell.today-cell{background:var(--midnight);color:var(--arctic)}
+.cal-cell .cdots{display:flex;gap:3px}
+.cal-cell .cdots i{width:4.5px;height:4.5px;border-radius:50%;display:block;background:var(--apres)}
+.cal-cell.today-cell .cdots i{background:var(--slopes)}
+.cal-cell.selected{outline:1.6px solid var(--mountain);outline-offset:-1.6px}
+
+/* day cards */
+.day-card{border-radius:24px;padding:19px 21px;box-shadow:var(--shadow);color:var(--ink)}
+.day-card.dark{color:var(--arctic)}
+.day-card .dc-head{display:flex;align-items:baseline;gap:10px}
+.day-card .dc-dw{font-size:10px;letter-spacing:.16em;font-weight:600;opacity:.65}
+.day-card .dc-num{font-family:var(--disp);font-size:42px;font-weight:600;letter-spacing:-.01em;line-height:.95}
+.day-card .dc-mon{font-size:12px;letter-spacing:.1em;font-weight:600;opacity:.55}
+.day-card .dc-note{margin-left:auto;font-family:var(--disp);font-style:italic;font-size:15px;font-weight:500}
+.day-card .dc-events{margin-top:11px;display:flex;flex-direction:column;gap:8px}
+.dc-ev{display:flex;gap:10px;align-items:center}
+.dc-ev .ev-time{font-size:10.5px;font-weight:600;letter-spacing:.04em;opacity:.6;width:50px;flex:0 0 auto}
+.dc-ev .ev-pill{background:rgba(9,15,21,.82);color:var(--arctic);border-radius:999px;padding:5px 13px;font-size:11.5px;font-weight:500}
+.day-card.dark .dc-ev .ev-pill{background:rgba(211,209,206,.16);color:var(--arctic)}
+
+/* ---------- NOTES ---------- */
+.notes-masonry{columns:2;column-gap:12px;padding:18px 20px}
+.note-card{
+  break-inside:avoid;margin-bottom:12px;border-radius:22px;padding:18px;
+  box-shadow:var(--shadow);position:relative;cursor:pointer;width:100%;text-align:left;
+  transition:transform .15s ease;display:block;color:var(--ink);
+}
+.note-card:active{transform:scale(.97)}
+.note-card.on-dark{color:var(--arctic)}
+.note-card .n-title{font-family:var(--disp);font-weight:600;font-size:17.5px;line-height:1.12;padding-right:26px}
+.note-card .n-body{font-size:12px;margin-top:8px;opacity:.85;line-height:1.5}
+.note-card .n-tag{margin-top:14px;display:flex;align-items:center;gap:6px;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;opacity:.7}
+.note-card .n-tag svg{width:12px;height:12px}
+.note-card .n-date{font-size:10px;opacity:.45;margin-top:3px;letter-spacing:.04em}
+.note-card .heart{position:absolute;top:15px;right:14px;width:28px;height:28px;border-radius:50%;
+  background:rgba(9,15,21,.07);display:grid;place-items:center;color:var(--ink)}
+.note-card.on-dark .heart{background:rgba(211,209,206,.13);color:var(--arctic)}
+.note-card ul.mini-check{list-style:none;margin-top:10px;display:flex;flex-direction:column;gap:7px}
+.note-card ul.mini-check li{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500}
+.note-card ul.mini-check li::before{
+  content:'';width:14px;height:14px;border-radius:50%;border:1.5px solid currentColor;flex:0 0 auto;opacity:.65;
+}
+.note-card ul.mini-check li.c{opacity:.55;text-decoration:line-through}
+.note-card ul.mini-check li.c::before{background:currentColor;opacity:.8}
+.note-card .n-it{font-family:var(--disp);font-style:italic;font-size:16px;font-weight:500;display:block;margin-top:8px}
+
+/* note detail */
+.note-detail{padding:14px 26px 30px}
+.nd-top{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 0}
+.nd-back{width:42px;height:42px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);
+  display:grid;place-items:center;color:var(--ink)}
+.nd-shared{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--apres);font-weight:600;
+  display:flex;align-items:center;gap:6px}
+.nd-title{font-family:var(--disp);font-size:40px;font-weight:600;letter-spacing:-.01em;line-height:1.05;margin:24px 0 16px}
+.nd-lead{font-size:14.5px;line-height:1.6}
+.nd-lead b{font-weight:600}
+.nd-body{font-size:14px;margin-top:14px;line-height:1.65;opacity:.85;white-space:pre-line}
+.nd-tools{display:flex;gap:10px;margin-top:24px;align-items:center}
+.nd-tools .tool{width:44px;height:44px;border-radius:50%;background:var(--card);box-shadow:var(--shadow);
+  display:grid;place-items:center;color:var(--ink)}
+.nd-tools .tool.main{background:var(--midnight);color:var(--arctic);width:52px;height:52px}
+.nd-it-zone{margin-top:24px;font-family:var(--disp);font-style:italic;font-size:24px;font-weight:500;color:var(--mountain)}
+.nd-tag-row{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap}
+.nd-area-chip{padding:8px 14px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;display:flex;align-items:center;gap:7px}
+.nd-area-chip svg{width:13px;height:13px}
+
+/* ---------- AREAS ---------- */
+.areas-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px 20px}
+.area-card{
+  border-radius:22px;padding:18px;min-height:142px;display:flex;flex-direction:column;justify-content:space-between;
+  box-shadow:var(--shadow);text-align:left;color:var(--ink);transition:transform .15s ease;
+}
+.area-card:active{transform:scale(.96)}
+.area-card.dark{color:var(--arctic)}
+.area-card .a-ic{color:currentColor;opacity:.9}
+.area-card .a-name{font-family:var(--disp);font-weight:600;font-size:16px;line-height:1.12;margin-top:9px}
+.area-card .a-phase{font-size:10.5px;color:inherit;opacity:.62;margin-top:3px;line-height:1.35}
+.area-card .a-bar{height:5px;border-radius:99px;background:rgba(9,15,21,.16);margin-top:12px;overflow:hidden}
+.area-card.dark .a-bar{background:rgba(211,209,206,.2)}
+.area-card .a-bar i{display:block;height:100%;border-radius:99px;background:var(--midnight)}
+.area-card.dark .a-bar i{background:var(--arctic)}
+.area-card .a-pct{font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.55;margin-top:6px;font-weight:600}
+
+/* area detail */
+.ad-hero{padding:26px 26px 22px;border-radius:0 0 34px 34px;color:var(--ink)}
+.ad-hero.dark{color:var(--arctic)}
+.ad-hero h2{font-family:var(--disp);font-size:36px;font-weight:600;line-height:1.05;margin-top:10px}
+.ad-hero .ad-vision{font-size:13.5px;margin-top:12px;line-height:1.55;opacity:.9}
+.ad-hero .ad-phase-chip{
+  display:inline-block;margin-top:14px;background:rgba(9,15,21,.82);color:var(--arctic);
+  padding:8px 15px;border-radius:999px;font-size:10.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+}
+.ad-hero.dark .ad-phase-chip{background:rgba(211,209,206,.16)}
+.big-goal{margin:18px 20px;border-radius:var(--r-lg);background:var(--midnight);color:var(--arctic);padding:22px;box-shadow:var(--shadow)}
+.big-goal .bg-label{font-size:9.5px;font-weight:600;letter-spacing:.2em;color:var(--slopes);text-transform:uppercase}
+.big-goal .bg-text{font-family:var(--disp);font-size:18px;font-weight:600;margin-top:9px;line-height:1.35}
+.big-goal .bg-bar{height:8px;border-radius:99px;background:rgba(211,209,206,.16);margin-top:16px;overflow:hidden}
+.big-goal .bg-bar i{display:block;height:100%;border-radius:99px;background:var(--arctic)}
+.big-goal .bg-row{display:flex;justify-content:space-between;margin-top:9px;font-size:11px;color:var(--slopes)}
+.milestones{padding:6px 16px}
+.mile{display:flex;gap:13px;padding:13px 4px;align-items:flex-start;border-bottom:1px dotted rgba(9,15,21,.25)}
+.mile:last-child{border-bottom:none}
+.mile .m-dot{width:12px;height:12px;border-radius:50%;border:1.6px solid var(--ink);flex:0 0 auto;margin-top:4px}
+.mile.done .m-dot{background:var(--ink)}
+.mile .m-text{font-size:13.5px;font-weight:500;line-height:1.4}
+.mile.done .m-text{opacity:.45;text-decoration:line-through}
+.mile .m-when{margin-left:auto;font-size:10px;letter-spacing:.06em;color:var(--apres);flex:0 0 auto;margin-top:4px;font-weight:600}
+
+/* ---------- JOY ---------- */
+.joy-balance{
+  margin:18px 20px;border-radius:30px;background:var(--midnight);color:var(--arctic);padding:30px 26px;box-shadow:var(--shadow);
+  position:relative;overflow:hidden;
+}
+.joy-balance .jb-pts{font-family:var(--disp);font-size:78px;font-weight:600;line-height:.95;letter-spacing:-.02em}
+.joy-balance .jb-lbl{font-size:11px;color:var(--slopes);margin-top:10px;letter-spacing:.06em}
+.joy-balance .jb-it{position:absolute;right:24px;top:24px;font-family:var(--disp);font-style:italic;font-size:17px;color:var(--slopes)}
+.reward-card{
+  display:flex;align-items:center;gap:14px;border-radius:var(--r-md);padding:15px 18px;
+  background:var(--card);box-shadow:var(--shadow);
+}
+.reward-card .rw-ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
+  background:rgba(179,183,186,.5);color:var(--ink)}
+.reward-card .rw-name{font-weight:600;font-size:13.5px}
+.reward-card .rw-cost{font-size:11px;color:var(--apres);margin-top:1px;letter-spacing:.04em}
+.reward-card .redeem{
+  margin-left:auto;background:var(--midnight);color:var(--arctic);border-radius:999px;
+  padding:9px 17px;font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;flex:0 0 auto;transition:all .2s;
+}
+.reward-card .redeem:disabled{opacity:.22}
+.reward-card.redeemed{opacity:.55}
+.reward-card.redeemed .redeem{background:var(--slopes);color:var(--midnight)}
+
+/* ---------- CHALLENGES ---------- */
+.chal-card{border-radius:var(--r-lg);padding:21px;box-shadow:var(--shadow);background:var(--card)}
+.chal-card .ch-q{font-family:var(--disp);font-size:17px;font-weight:600;line-height:1.3}
+.chal-card .ch-sec{margin-top:13px}
+.chal-card .ch-lbl{font-size:9px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--apres)}
+.chal-card .ch-txt{font-size:13px;margin-top:5px;line-height:1.55}
+.chal-card .ch-lesson{
+  margin-top:14px;padding:13px 15px;border-radius:13px;font-size:13px;line-height:1.5;
+  background:var(--mountain);color:var(--arctic);font-family:var(--disp);font-style:italic;font-weight:500;
+}
+.chal-card .ch-tagrow{display:flex;justify-content:space-between;align-items:center;margin-top:14px}
+.chal-card .ch-area{font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+  display:flex;align-items:center;gap:6px;color:var(--apres)}
+.chal-card .ch-area svg{width:12px;height:12px}
+.chal-card .ch-date{font-size:10px;color:var(--apres);letter-spacing:.04em}
+
+/* ---------- bottom nav ---------- */
+.bottom-nav{
+  position:fixed;bottom:18px;left:50%;transform:translateX(-50%);
+  background:var(--midnight);border-radius:999px;display:flex;gap:3px;padding:8px;
+  box-shadow:0 14px 36px rgba(9,15,21,.4);z-index:200;
+}
+.bn-btn{
+  width:58px;height:56px;border-radius:999px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;color:rgba(211,209,206,.5);transition:all .2s ease;
+}
+.bn-btn svg{width:19px;height:19px}
+.bn-btn .bn-lbl{font-size:8px;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.bn-btn.active{background:var(--arctic);color:var(--midnight)}
+@media(max-width:380px){.bn-btn{width:52px}}
+
+/* fab — outlined circle, like the inspo's "+" */
+.fab{
+  position:fixed;bottom:96px;right:calc(50% - 240px + 20px);z-index:190;
+  width:54px;height:54px;border-radius:50%;
+  background:var(--paper);border:1.4px solid rgba(9,15,21,.4);color:var(--ink);
+  box-shadow:var(--shadow);display:grid;place-items:center;
+}
+@media(max-width:520px){.fab{right:20px}}
+
+/* toast */
+.toast{
+  position:fixed;bottom:96px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--midnight);color:var(--arctic);padding:13px 24px;border-radius:999px;
+  font-size:12.5px;opacity:0;transition:all .3s ease;z-index:400;pointer-events:none;
+  white-space:nowrap;box-shadow:0 10px 30px rgba(9,15,21,.35);
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast em{font-family:var(--disp);font-style:italic;font-weight:500;font-size:14.5px;margin-right:5px}
+
+.pad-b{height:26px}
+
+/* ---------- v3: live-use additions ---------- */
+.storage-note{
+  margin:12px 20px 0;padding:11px 16px;border-radius:14px;font-size:11.5px;
+  background:var(--mountain);color:var(--arctic);line-height:1.45;
+}
+.manage-link{
+  font-family:var(--disp);font-style:italic;font-size:13px;font-weight:500;color:var(--apres);
+  margin-left:12px;letter-spacing:0;text-transform:none;text-decoration:underline;text-underline-offset:3px;
+}
+.del-x{
+  display:none;width:24px;height:24px;border-radius:50%;flex:0 0 auto;
+  background:var(--mountain);color:var(--arctic);place-items:center;margin-left:6px;
+}
+body.managing .del-x{display:grid}
+body.managing .s-check,body.managing .s-pts{display:none}
+.note-del{position:absolute;bottom:12px;right:12px;z-index:2}
+
+.backup-row{display:flex;gap:10px;padding:18px 20px 0}
+.backup-btn{
+  flex:1;padding:13px;border-radius:999px;border:1.3px solid rgba(9,15,21,.35);
+  font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);
+}
+
+/* modal */
+.modal-back{
+  position:fixed;inset:0;background:rgba(9,15,21,.55);z-index:500;display:none;
+  align-items:flex-end;justify-content:center;
+}
+.modal-back.open{display:flex}
+.modal{
+  width:100%;max-width:480px;background:var(--paper);border-radius:28px 28px 0 0;
+  padding:26px 24px 34px;max-height:86vh;overflow-y:auto;animation:slideup .3s ease both;
+}
+@keyframes slideup{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.modal h3{font-family:var(--disp);font-size:26px;font-weight:600;line-height:1.05}
+.modal h3 em{font-weight:500}
+.modal .m-field{margin-top:16px}
+.modal label{display:block;font-size:9.5px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--apres);margin-bottom:7px}
+.modal input[type=text],.modal input[type=number],.modal input[type=date],.modal textarea,.modal select{
+  width:100%;padding:13px 15px;border-radius:14px;border:1.3px solid rgba(9,15,21,.3);
+  background:var(--card-2);font-family:var(--body);font-size:14px;color:var(--ink);
+}
+.modal textarea{min-height:84px;resize:vertical}
+.modal .m-check{display:flex;align-items:center;gap:9px;font-size:13px;margin-top:16px}
+.modal .m-check input{width:17px;height:17px;accent-color:var(--midnight)}
+.modal .sw-row{display:flex;gap:9px}
+.modal .sw-pick{width:38px;height:38px;border-radius:50%;border:2px solid transparent}
+.modal .sw-pick.on{border-color:var(--midnight);outline:2px solid var(--paper);outline-offset:-5px}
+.modal .m-actions{display:flex;gap:10px;margin-top:24px}
+.modal .m-save{
+  flex:1;background:var(--midnight);color:var(--arctic);border-radius:999px;padding:15px;
+  font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+}
+.modal .m-cancel{
+  padding:15px 22px;border-radius:999px;border:1.3px solid rgba(9,15,21,.35);
+  font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
+}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+
+<!-- ================= TODAY ================= -->
+<section class="page active" id="page-today">
+  <div id="storageNote" class="storage-note" style="display:none">This preview can't save — open the file in Chrome to keep your data.</div>
+  <div class="today-head"><div class="greet" id="greetLine">Good evening, Milele</div></div>
+  <div class="today-title-row">
+    <h1>Today's<br><em>Schedule</em></h1>
+    <div class="joy-chip"><div class="pts" id="joyChipPts">0</div><div class="lbl">Joy points</div></div>
+  </div>
+  <div class="today-date" id="todayDate"></div>
+
+  <div class="week-strip" id="weekStrip"></div>
+
+  <div class="section-label">Today's focus <span class="more">three things, that's it</span></div>
+  <div class="sched" id="prioritySched"></div>
+
+  <div class="section-label">The rest of today <span class="more" id="taskCount"></span><button class="manage-link" onclick="toggleManage()">edit</button></div>
+  <div class="sched" id="taskSched"></div>
+
+  <div class="section-label">Reminders <span class="more">auto from calendar</span></div>
+  <div class="stack" id="remindStack"></div>
+  <div class="pad-b"></div>
+</section>
+
+<!-- ================= CALENDAR ================= -->
+<section class="page" id="page-calendar">
+  <div class="hero">
+    <h1>My<br><em>Calendar</em></h1>
+    <div class="sub">Every deadline. One place.</div>
+  </div>
+  <div class="month-nav">
+    <button class="mn-side" id="mnPrev" onclick="moveMonth(-1)">‹ PREV</button>
+    <span class="mn-cur" id="mnCur">June</span>
+    <button class="mn-side" id="mnNext" onclick="moveMonth(1)">NEXT ›</button>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <div class="section-label">Coming up <span class="more">tap a date above</span><button class="manage-link" onclick="toggleManage()">edit</button></div>
+  <div class="stack" id="dayCards"></div>
+  <div class="pad-b"></div>
+</section>
+
+<!-- ================= NOTES ================= -->
+<section class="page" id="page-notes">
+  <div class="ink-band">
+    <div class="hero on-ink">
+      <h1>My<br><em>Notes</em></h1>
+    </div>
+    <div class="pills" id="notePills"></div>
+  </div>
+  <div class="notes-masonry" id="notesMasonry"></div>
+  <div class="pad-b"></div>
+</section>
+
+<!-- ================= NOTE DETAIL ================= -->
+<section class="page" id="page-note-detail">
+  <div class="nd-top">
+    <button class="nd-back" onclick="go('notes')" id="ndBackBtn"></button>
+    <span class="nd-shared" id="ndShared"></span>
+    <button class="nd-back" id="ndShareBtn"></button>
+  </div>
+  <div class="note-detail" id="noteDetailBody"></div>
+</section>
+
+<!-- ================= AREAS ================= -->
+<section class="page" id="page-areas">
+  <div class="hero">
+    <h1>My<br><em>Areas</em></h1>
+    <div class="sub">Ten areas. One life.</div>
+  </div>
+  <div class="areas-grid" id="areasGrid"></div>
+  <div class="section-label">Challenges log <span class="more">how I grow</span><button class="manage-link" onclick="openModal('challenge')">+ new</button></div>
+  <div class="stack" id="chalStack"></div>
+  <div class="pad-b"></div>
+</section>
+
+<!-- ================= AREA DETAIL ================= -->
+<section class="page" id="page-area-detail">
+  <div class="nd-top">
+    <button class="nd-back" onclick="go('areas')" id="adBackBtn"></button>
+    <span class="nd-shared">Tracker</span>
+    <button class="nd-back" id="adEditBtn"></button>
+  </div>
+  <div id="areaDetailBody"></div>
+  <div class="pad-b"></div>
+</section>
+
+<!-- ================= JOY ================= -->
+<section class="page" id="page-joy">
+  <div class="hero">
+    <h1>My<br><em>Joy</em></h1>
+    <div class="sub">You earned this.</div>
+  </div>
+  <div class="joy-balance">
+    <span class="jb-it">keep going</span>
+    <div class="jb-pts" id="joyBigPts">35</div>
+    <div class="jb-lbl">joy points — five per task, fifteen per focus block</div>
+  </div>
+  <div class="section-label">My rewards <span class="more">you define these</span><button class="manage-link" onclick="openModal('reward')">+ new</button><button class="manage-link" onclick="toggleManage()">edit</button></div>
+  <div class="stack" id="rewardStack"></div>
+  <div class="backup-row">
+    <button class="backup-btn" onclick="backupData()">Back up my data</button>
+    <button class="backup-btn" onclick="document.getElementById('restoreInput').click()">Restore</button>
+    <input type="file" id="restoreInput" accept=".json" style="display:none" onchange="restoreData(event)">
+  </div>
+  <div class="pad-b"></div>
+</section>
+
+</div><!-- /app -->
+
+<button class="fab" id="fab" onclick="fabAction()"></button>
+
+<nav class="bottom-nav" id="bottomNav"></nav>
+
+<div class="modal-back" id="modalBack" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= ICON LIBRARY ================= */
+const P = {
+  sun:'<circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.4M12 19.1v2.4M2.5 12h2.4M19.1 12h2.4M5 5l1.7 1.7M17.3 17.3L19 19M19 5l-1.7 1.7M6.7 17.3L5 19"/>',
+  calendar:'<rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/>',
+  pen:'<path d="M4 20l1.2-4.2L16.4 4.6a2.1 2.1 0 013 3L8.2 18.8 4 20z"/><path d="M13.5 7.5l3 3"/>',
+  compass:'<circle cx="12" cy="12" r="9"/><path d="M15.5 8.5l-2.2 5-5 2.2 2.2-5 5-2.2z"/>',
+  sparkle:'<path d="M12 3.5c.6 4.4 1.8 5.9 6.5 8.5-4.7 2.6-5.9 4.1-6.5 8.5-.6-4.4-1.8-5.9-6.5-8.5 4.7-2.6 5.9-4.1 6.5-8.5z"/>',
+  book:'<path d="M12 6.5C10.5 5 8.5 4.5 4.5 4.5v13.5c4 0 6 .5 7.5 2 1.5-1.5 3.5-2 7.5-2V4.5c-4 0-6 .5-7.5 2z"/><path d="M12 6.5V20"/>',
+  cap:'<path d="M2.5 9.5L12 5l9.5 4.5L12 14 2.5 9.5z"/><path d="M6.5 11.5v4.5c0 1.4 2.5 2.8 5.5 2.8s5.5-1.4 5.5-2.8v-4.5"/><path d="M21.5 9.5v5"/>',
+  code:'<path d="M8.5 7L4 12l4.5 5M15.5 7L20 12l-4.5 5"/>',
+  note:'<circle cx="7.5" cy="17" r="3"/><path d="M10.5 17V4.5l8-1.6v11"/><circle cx="15.5" cy="14" r="3"/>',
+  cherry:'<circle cx="8" cy="16" r="3.6"/><circle cx="16.5" cy="14.5" r="3.2"/><path d="M9 12.6C9.8 9 11.5 6 14.5 4M16 11.5c-.6-3 .3-5.5 2.2-7.2M14.5 4c1.6-.4 3.4-.2 4.5.6"/>',
+  nib:'<path d="M12 3.5l5 5L9.5 19 4 20l1-5.5L12 3.5z"/><circle cx="10.5" cy="13.5" r="1.1"/><path d="M10.5 13.5L5 19"/>',
+  dumbbell:'<path d="M8.5 8.5l7 7"/><rect x="2.5" y="6.5" width="4" height="7" rx="1.4" transform="rotate(-45 4.5 10)"/><rect x="17.5" y="10.5" width="4" height="7" rx="1.4" transform="rotate(-45 19.5 14)"/>',
+  sprout:'<path d="M12 21v-8.5"/><path d="M12 12.5C12 8.5 9.5 6 5 6c0 4.5 2.5 7 7 6.5z"/><path d="M12 10.5c0-3.4 2.1-5.5 6-5.5 0 3.9-2.1 6-6 5.8"/>',
+  home:'<path d="M4 11l8-7 8 7"/><path d="M6 9.5V20h12V9.5"/><path d="M10 20v-5.5h4V20"/>',
+  heart:'<path d="M12 20S3.5 14.7 3.5 8.9C3.5 6 5.8 4 8.3 4c1.6 0 3 .8 3.7 2.1C12.7 4.8 14.1 4 15.7 4c2.5 0 4.8 2 4.8 4.9C20.5 14.7 12 20 12 20z"/>',
+  heartFill:'<path fill="currentColor" stroke="none" d="M12 20S3.5 14.7 3.5 8.9C3.5 6 5.8 4 8.3 4c1.6 0 3 .8 3.7 2.1C12.7 4.8 14.1 4 15.7 4c2.5 0 4.8 2 4.8 4.9C20.5 14.7 12 20 12 20z"/>',
+  banknote:'<rect x="2.5" y="6.5" width="19" height="11" rx="2.2"/><circle cx="12" cy="12" r="2.6"/><path d="M5.8 9.8v.01M18.2 14.2v.01"/>',
+  doc:'<path d="M6 3.5h8.5L19 8v12.5H6V3.5z"/><path d="M14 3.5V8.5H19"/><path d="M9 12.5h6M9 16h6"/>',
+  camera:'<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8.5 7l1.5-2.5h4L15.5 7"/><circle cx="12" cy="13.2" r="3.4"/>',
+  clipboard:'<rect x="5" y="4.5" width="14" height="16.5" rx="2.2"/><rect x="8.5" y="2.8" width="7" height="3.4" rx="1.4"/><path d="M8.5 11h7M8.5 15h5"/>',
+  lock:'<rect x="5.5" y="10.5" width="13" height="9.5" rx="2.2"/><path d="M8.5 10.5V7.8a3.5 3.5 0 017 0v2.7"/>',
+  chevL:'<path d="M14.5 5.5L8 12l6.5 6.5"/>',
+  arrowUp:'<path d="M12 19V5.5M6.5 11L12 5.5 17.5 11"/>',
+  plus:'<path d="M12 5.5v13M5.5 12h13"/>',
+  x:'<path d="M6.5 6.5l11 11M17.5 6.5l-11 11"/>',
+  trash:'<path d="M4.5 6.5h15M9.5 6.5V4.8a1.3 1.3 0 011.3-1.3h2.4a1.3 1.3 0 011.3 1.3v1.7M6.5 6.5l1 13.2a1.6 1.6 0 001.6 1.5h5.8a1.6 1.6 0 001.6-1.5l1-13.2"/><path d="M10 10.5v6M14 10.5v6"/>',
+  list:'<path d="M4.5 6.5h15M4.5 12h15M4.5 17.5h9"/>',
+  cup:'<path d="M7 4.5h10l-1.4 15a1.8 1.8 0 01-1.8 1.5h-3.6a1.8 1.8 0 01-1.8-1.5L7 4.5z"/><path d="M7.4 9h9.2"/><path d="M11 4.5L13.5 1.5"/>',
+  screen:'<rect x="3" y="4.5" width="18" height="12.5" rx="2.2"/><path d="M9 20.5h6M12 17v3.5"/>',
+  phone:'<rect x="6.5" y="2.5" width="11" height="19" rx="2.8"/><path d="M10.5 18.5h3"/>',
+  coffee:'<path d="M5 8h11v7.5a4 4 0 01-4 4H9a4 4 0 01-4-4V8z"/><path d="M16 9.5h1.8a2.4 2.4 0 010 4.8H16"/><path d="M8.5 5.2V3.4M12.5 5.2V3.4"/>',
+  guitar:'<path d="M13.7 10.3l6-6.5M18.2 3.3l2.5 2.5"/><circle cx="9" cy="15" r="5.5"/><circle cx="9" cy="15" r="1.6"/>',
+  check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  edit:'<path d="M14.5 5.5l4 4L8 20H4v-4L14.5 5.5z"/>',
+  gift:'<rect x="3.5" y="9" width="17" height="11.5" rx="2"/><path d="M12 9v11.5M3.5 13.5h17"/><path d="M12 9c-2.8 0-4.8-1.1-4.8-2.8C7.2 4.9 8.3 4 9.6 4 11.3 4 12 6 12 9zM12 9c2.8 0 4.8-1.1 4.8-2.8C16.8 4.9 15.7 4 14.4 4 12.7 4 12 6 12 9z"/>',
+  flag:'<path d="M5.5 21V4"/><path d="M5.5 5h12.5l-2.8 3.5L18 12H5.5"/>',
+};
+const I = (name, s=18) =>
+  `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${P[name]}</svg>`;
+
+/* ================= PALETTE ================= */
+const SW = {
+  arctic:   {bg:'#D3D1CE', dark:false, label:'Arctic'},
+  card:     {bg:'#EBEAE6', dark:false, label:'Paper'},
+  slopes:   {bg:'#B3B7BA', dark:false, label:'Slopes'},
+  apres:    {bg:'#6C6D74', dark:true,  label:'Après Ski'},
+  mountain: {bg:'#262E36', dark:true,  label:'Mountainside'},
+  midnight: {bg:'#090F15', dark:true,  label:'Midnight'},
+};
+
+/* ================= STATIC: THE 10 AREAS ================= */
+const AREAS = {
+  faith:    {name:'Faith & Ministry', icon:'book', sw:'arctic', phase:'Testing series · Session 5 next',
+    vision:'Faith as the foundation, not a compartment. Walking with God daily — and leading others to do the same.',
+    goal:'Finish the Testing series strong & read the Bible cover to cover', pct:55, goalNote:'Session 5 of 8 · Bible plan running',
+    miles:[{t:'Session 4 — Exodus',w:'done',d:true},{t:'Session 5 facilitator guide',w:'Jun 30',d:false},{t:'2 verses memorized (June)',w:'Jun 30',d:false},{t:'Video shoot verdict — message or release',w:'Jun 30',d:false}]},
+  school:   {name:'School', icon:'cap', sw:'midnight', phase:'T1 · Week 4 of 15',
+    vision:'3.6 GPA, zero retakes, graduate May 2029. Score 81+ in everything — one unit at a time.',
+    goal:'Trimester 1: A- or better in all 4 units', pct:27, goalNote:'MAT 120 · ENG 113X · SIT 122 · SIT 101',
+    miles:[{t:'1st installment paid',w:'May 18',d:true},{t:'2nd installment KES 28,711.50',w:'Jun 18',d:false},{t:'OS CAT 1 (SIT 122)',w:'~Jun 24',d:false},{t:'Of Pawns & Players reading quiz',w:'~Jun 25',d:false}]},
+  career:   {name:'Career & Tech', icon:'code', sw:'mountain', phase:'Track 1 · Web Dev',
+    vision:'Web dev, then data, then ML and AI. Build real things, ship real projects, stay in the know.',
+    goal:'Track 1 done by Dec 2026 — this Life OS site is the capstone', pct:12, goalNote:'freeCodeCamp + P1→P4 projects',
+    miles:[{t:'freeCodeCamp Responsive Web Design',w:'ongoing',d:false},{t:'P1 — personal intro page live',w:'Jul',d:false},{t:'P2 — own the TSB site code',w:'Aug',d:false},{t:'P4 — Life OS website (this!)',w:'Dec',d:false}]},
+  music:    {name:'Music', icon:'note', sw:'slopes', phase:'Lane 2 · Pentatonic ladder',
+    vision:'Play like it\u2019s second nature — neo-soul voicings, real solos, a real band one day. Free play stays free.',
+    goal:'All 5 pentatonic positions + first full solo learned', pct:15, goalNote:'June focus: position 1 → 2',
+    miles:[{t:'Daily free play (joy clause)',w:'always',d:true},{t:'3 × 15-min focus blocks this week',w:'weekly',d:false},{t:'Song of the month — by ear first',w:'Jun 30',d:false},{t:'BandLab sketch from a voice memo',w:'Jun 30',d:false}]},
+  tsb:      {name:'The Snack Basket', icon:'cherry', sw:'slopes', phase:'Phase 0 · Standardize',
+    vision:'Your Daily Escape into Flavor. From street-side snack to café chain — built on recipes that never miss.',
+    goal:'Phase 0 exit: 5 stovetop recipes standardized, same result 3×', pct:30, goalNote:'First paid sales Nov–Dec',
+    miles:[{t:'Brand + website + trademark filed',w:'done',d:true},{t:'Recipe #1 (samosas) — test 2 of 3',w:'this wk',d:false},{t:'Recipe cards with unit costs',w:'Aug 31',d:false},{t:'CG hangout = first batch test',w:'Sep',d:false}]},
+  writing:  {name:'Writing & Voice', icon:'nib', sw:'midnight', phase:'Craft gym · no forced posts',
+    vision:'A voice that\u2019s unmistakably mine. Read like a writer, log the words, publish when it\u2019s real.',
+    goal:'ENG 113X portfolio = funded bootcamp (20% of grade)', pct:10, goalNote:'12 components · vocab log running',
+    miles:[{t:'Of Pawns & Players — finish reading',w:'Jun 24',d:false},{t:'Vocab log: deploy each word in a week',w:'weekly',d:false},{t:'Monthly voice study — pick the writer',w:'Jun',d:false},{t:'Copywork: one great paragraph',w:'Jun',d:false}]},
+  fitness:  {name:'Fitness', icon:'dumbbell', sw:'mountain', phase:'Phase 1 · Foundation',
+    vision:'Glutes, abs, arms by November. Home-only, day-type system, never-zero rule. The week owes three.',
+    goal:'November: visible change + strength numbers up', pct:20, goalNote:'Baseline: squats/min · plank · rung 1',
+    miles:[{t:'Baseline test week',w:'done',d:true},{t:'Session 2 of 3 this week',w:'today',d:false},{t:'Push-up ladder: wall → incline',w:'Jul',d:false},{t:'Monthly progress photo',w:'Jun 30',d:false}]},
+  growth:   {name:'Personal Growth', icon:'sprout', sw:'arctic', phase:'Journalling + nervous system',
+    vision:'Close the gap between knowing and living it. Insight to embodied practice, one rep at a time.',
+    goal:'Daily journal + monthly deep session, every month', pct:40, goalNote:'Next: "safe enough to try — and stay"',
+    miles:[{t:'Social media deleted (defended)',w:'done',d:true},{t:'Journal streak — 20 min evenings',w:'daily',d:false},{t:'June deep session (calendar-blocked)',w:'Jun',d:false},{t:'One rest experiment + after-test',w:'weekly',d:false}]},
+  adulting: {name:'Adulting', icon:'home', sw:'card', phase:'Bucket system redesign',
+    vision:'Genuine self-sufficiency in 2–3 years: own space, own income, papers in order, boundaries said out loud.',
+    goal:'Resilient money system + 2-month emergency buffer', pct:25, goalNote:'Weekly 5-min check · monthly audit',
+    miles:[{t:'Weekly budget check (5 min)',w:'Mon',d:false},{t:'Remind dad: installment Jun 18',w:'now',d:false},{t:'June audit day (1 hr)',w:'Jun 28',d:false},{t:'Matatu-only plan: 600/day holds',w:'daily',d:false}]},
+  rel:      {name:'Relationships', icon:'heart', sw:'apres', phase:'5 circles · guarding the anchors',
+    vision:'Give from fullness, not emptiness. Anchors watered, drains released, guilt retired as a compass.',
+    goal:'Weekly Yasmin check-in + monthly joy-only social thing', pct:40, goalNote:'Quarterly family conversation queued',
+    miles:[{t:'Yasmin check-in',w:'weekly',d:true},{t:'One purely-for-joy hangout',w:'Jun',d:false},{t:'Drain circle audit',w:'Jun 30',d:false},{t:'CG hangout planning (20 ppl)',w:'Sep',d:false}]},
+};
+
+/* ================= SEED DATA (first run only) ================= */
+const SEED = {
+  joy: 35,
+  lastDay: '',
+  tasks: [
+    {id:1, area:'faith',   time:'9:30 pm', title:'Evening word + prayer',            meta:'15 min, before bed',            pts:5,  done:false, pri:true},
+    {id:2, area:'school',  time:'5:30 pm', title:'ENG 113X class — online',          meta:'until 8:30, attendance counts', pts:5,  done:false, pri:true},
+    {id:3, area:'writing', time:'4:00 pm', title:'Of Pawns & Players, ch. 6–7',      meta:'20 min, quiz on the 25th',      pts:5,  done:false, pri:true},
+    {id:4, area:'school',  time:'2:00 pm', title:'Khan Academy — MAT 120',           meta:'30 min, recovery plan',         pts:5,  done:false, pri:false},
+    {id:5, area:'career',  time:'3:00 pm', title:'freeCodeCamp — 30 min',            meta:'Track 1, web dev',              pts:5,  done:false, pri:false},
+    {id:6, area:'music',   time:'8:45 pm', title:'Focus block — pentatonics',        meta:'15 min, position one',          pts:15, done:false, pri:false},
+    {id:7, area:'fitness', time:'6:00 pm', title:'Workout A — glutes',               meta:'25 min, session 2 of 3',        pts:5,  done:false, pri:false},
+    {id:8, area:'growth',  time:'9:00 pm', title:'Journal — raw capture',            meta:'what did my body say today?',   pts:5,  done:false, pri:false},
+    {id:9, area:'tsb',     time:'7:30 pm', title:'Cost the samosa batch',            meta:'recipe card v1 — grams, not "a bit"', pts:5, done:false, pri:false},
+  ],
+  events: {
+    '2026-06-12':[{t:'4:00p',n:'CG prep — Session 5',a:'faith'},{t:'6:00p',n:'Co-leader sync',a:'faith'}],
+    '2026-06-13':[{t:'10:00a',n:'Samosa test #2',a:'tsb'},{t:'4:00p',n:'Badminton scout at Daystar',a:'fitness'}],
+    '2026-06-14':[{t:'9:00a',n:'Church + worship team',a:'faith'},{t:'7:00p',n:'Weekly reflection',a:'growth'}],
+    '2026-06-15':[{t:'8:00a',n:'Budget check — 5 min',a:'adulting'},{t:'2:00p',n:'MAT 120 class',a:'school'}],
+    '2026-06-17':[{t:'8:00a',n:'SIT 122 lab',a:'school'},{t:'5:00p',n:'Focus block — guitar',a:'music'}],
+    '2026-06-18':[{t:'due',n:'2nd installment DUE',a:'adulting'}],
+    '2026-06-21':[{t:'9:00a',n:'Church + worship',a:'faith'},{t:'3:00p',n:'Yasmin check-in',a:'rel'}],
+    '2026-06-24':[{t:'8:00a',n:'OS CAT 1',a:'school'}],
+    '2026-06-25':[{t:'5:30p',n:'ENG quiz — Pawns & Players',a:'writing'}],
+    '2026-06-28':[{t:'10:00a',n:'June audit day',a:'adulting'},{t:'4:00p',n:'Deep session with Clio',a:'growth'}],
+    '2026-06-30':[{t:'eod',n:'Session 5 due + video verdict',a:'faith'},{t:'pm',n:'Progress photo',a:'fitness'}],
+  },
+  notes: [
+    {id:1, sw:'arctic',   title:'Plan for the day', area:'growth', date:'Jun 11, 2026', fav:true,
+     check:[{t:'Buy ENG reader',c:true},{t:'Khan 30 min',c:true},{t:'Workout A',c:false},{t:'Journal before bed',c:false}], lead:'', body:''},
+    {id:2, sw:'midnight', title:'Session 5 ideas', area:'faith', date:'Jun 10, 2026', fav:true,
+     lead:'The wilderness wasn\u2019t punishment — it was preparation.',
+     body:'Jesus was LED by the Spirit into the desert. Testing isn\u2019t God losing track of you. Pull the thread from Exodus: bread, presence, identity. Q1: where do we confuse testing with abandonment?', it:'this one preaches'},
+    {id:3, sw:'mountain', title:'Lyric idea', area:'music', date:'Jun 9, 2026', fav:false,
+     lead:'"You meet me in the middle of my almost-faith…"',
+     body:'Came during free play — Cmaj7 to Am9, slow. Voice memo saved. Maybe the bridge lives a third up.', it:'don\u2019t lose this'},
+    {id:4, sw:'card',     title:'Samosa v1 — test notes', area:'tsb', date:'Jun 8, 2026', fav:false,
+     lead:'Batch of 24 · cost KES 410 · about 17 per piece.',
+     body:'Pastry too thick on 6 of them — roll to 2mm next time. Filling ratio perfect. Fry at medium, not high. Same result twice now — one more test and it\u2019s standardized.'},
+    {id:5, sw:'slopes',   title:'Prayer list', area:'faith', date:'Jun 8, 2026', fav:true, lead:'',
+     body:'Mum\u2019s week at work. Yasmin\u2019s interview. The CG — that Session 5 lands. Dad — softness, somewhere to start. Me — courage to keep showing up small.'},
+    {id:6, sw:'arctic',   title:'Flexbox finally clicked', area:'career', date:'Jun 7, 2026', fav:false,
+     lead:'justify-content is the main axis. align-items is the cross axis.',
+     body:'That\u2019s it. That\u2019s the whole thing I was confused about for a week. gap beats margins for spacing siblings. Built the practice nav in 20 minutes.'},
+    {id:7, sw:'mountain', title:'Voicings to steal', area:'music', date:'Jun 5, 2026', fav:false,
+     lead:'Cmaj7 (x32000) → Am9 (x02410) → Fmaj7 (x33210)',
+     body:'The Bruno Major move: let the open strings ring through the change. Sounds expensive. Costs nothing.'},
+    {id:8, sw:'card',     title:'Baseline numbers', area:'fitness', date:'Jun 3, 2026', fav:false,
+     lead:'Squats per minute: 22 · Plank: 48s · Ladder: rung 1 (wall)',
+     body:'November-me is going to read this and smile. Same spot, same light for photos. No scale — strength numbers only.'},
+    {id:9, sw:'midnight', title:'Guilt is not a compass', area:'rel', date:'Jun 2, 2026', fav:true,
+     lead:'Said no to the hangout. Guilt came anyway. It passed.',
+     body:'The guilt showing up doesn\u2019t mean I was wrong. It\u2019s old wiring firing on schedule. I felt MORE myself by 9pm. Logging this as evidence.', it:'evidence'},
+  ],
+  rewards: [
+    {id:1, icon:'cup',    name:'Bubble tea run',              cost:50,  redeemed:false},
+    {id:2, icon:'screen', name:'K-drama episode, zero guilt', cost:30,  redeemed:false},
+    {id:3, icon:'phone',  name:'Webtoon hour',                cost:40,  redeemed:false},
+    {id:4, icon:'coffee', name:'Café writing morning',        cost:100, redeemed:false},
+    {id:5, icon:'guitar', name:'New strings fund unlock',     cost:150, redeemed:false},
+  ],
+  challenges: [
+    {id:1, q:'Caught a fantasy spiral before it ate the evening', area:'growth', date:'Jun 10, 2026',
+     how:'Noticed it in my chest first — the floaty, scripted feeling. Named it out loud. Put the phone in the other room and played guitar instead.',
+     lesson:'The spiral has a body signature. If I catch the chest-feeling, I get to choose.'},
+    {id:2, q:'Math panic during the MAT 120 quiz', area:'school', date:'Jun 4, 2026',
+     how:'Old story showed up: "you\u2019re bad at this." Breathed, skipped the hard one, came back to it. Finished. Started the Khan recovery plan that same evening.',
+     lesson:'Panic is old data, not a prophecy. The recovery plan exists because I wrote it for exactly this moment.'},
+    {id:3, q:'Said no to a drain-circle hangout', area:'rel', date:'Jun 2, 2026',
+     how:'"I can\u2019t make it." No essay, no excuse, no over-explaining. Sat with the guilt for an hour. It passed. Spent the evening on Session 5 prep instead.',
+     lesson:'Guilt will come anyway — it\u2019s wiring, not truth. I don\u2019t owe an explanation to keep the peace.'},
+  ],
+};
+
+/* ================= STORAGE (safe, with fallback) ================= */
+const STORE_KEY = 'milele-os-v1';
+let canStore = false;
+try {
+  window.localStorage.setItem('__t','1');
+  window.localStorage.removeItem('__t');
+  canStore = true;
+} catch(e){ canStore = false; }
+
+let state;
+function load(){
+  if(canStore){
+    try {
+      const raw = window.localStorage.getItem(STORE_KEY);
+      if(raw){ state = JSON.parse(raw); return; }
+    } catch(e){}
+  }
+  state = JSON.parse(JSON.stringify(SEED));
+}
+function save(){
+  if(!canStore) return;
+  try { window.localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch(e){}
+}
+
+/* ================= DATES ================= */
+const NOW = new Date();
+const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+const TODAY_ISO = iso(NOW);
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DOWS = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+function niceDate(d){
+  return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()] + ', ' +
+    MONTHS[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear();
+}
+function shortDate(d){ return MONTHS[d.getMonth()].slice(0,3) + ' ' + d.getDate() + ', ' + d.getFullYear(); }
+
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+const swOf = k => SW[AREAS[k].sw];
+function toast(msg){
+  const t = $('toast');
+  t.innerHTML = msg;
+  t.classList.add('show');
+  clearTimeout(t._h);
+  t._h = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function floatPts(x, y, n){
+  const f = document.createElement('div');
+  f.className = 'float-pts';
+  f.textContent = '+' + n;
+  f.style.left = x + 'px'; f.style.top = y + 'px';
+  document.body.appendChild(f);
+  setTimeout(()=>{ if(f.remove) f.remove(); }, 1000);
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ================= NAV ================= */
+const NAV = [
+  {page:'today',    icon:'sun',      label:'Today'},
+  {page:'calendar', icon:'calendar', label:'Diary'},
+  {page:'notes',    icon:'pen',      label:'Notes'},
+  {page:'areas',    icon:'compass',  label:'Areas'},
+  {page:'joy',      icon:'sparkle',  label:'Joy'},
+];
+let currentPage = 'today';
+function renderNav(active){
+  $('bottomNav').innerHTML = NAV.map(n=>`
+    <button class="bn-btn ${n.page===active?'active':''}" data-page="${n.page}" onclick="go('${n.page}')">
+      ${I(n.icon,19)}<span class="bn-lbl">${n.label}</span>
+    </button>`).join('');
+}
+function go(page){
+  currentPage = page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  $('page-' + page).classList.add('active');
+  renderNav(page);
+  const fabPages = {today:1, notes:1, calendar:1};
+  $('fab').style.display = fabPages[page] ? 'grid' : 'none';
+  document.body.classList.remove('managing');
+  window.scrollTo({top:0});
+}
+function fabAction(){
+  if(currentPage === 'today') openModal('task');
+  else if(currentPage === 'notes') openModal('note');
+  else if(currentPage === 'calendar') openModal('event');
+}
+function toggleManage(){
+  document.body.classList.toggle('managing');
+}
+
+/* ================= TODAY ================= */
+function renderTodayHeader(){
+  const h = NOW.getHours();
+  $('greetLine').textContent = (h<12?'Good morning':h<17?'Good afternoon':'Good evening') + ', Milele';
+  $('todayDate').textContent = niceDate(NOW);
+}
+function renderWeekStrip(){
+  const monday = new Date(NOW);
+  monday.setDate(NOW.getDate() - ((NOW.getDay()+6)%7));
+  let html = '';
+  for(let i=0;i<7;i++){
+    const d = new Date(monday); d.setDate(monday.getDate()+i);
+    const k = iso(d);
+    const n = Math.min((state.events[k]||[]).length, 3);
+    const today = k === TODAY_ISO;
+    html += `<div class="day-chip ${today?'today':''}">
+      <div class="dw">${DOWS[d.getDay()]}</div><div class="dn">${d.getDate()}</div>
+      <div class="dots">${'<i></i>'.repeat(n)}</div>
+    </div>`;
+  }
+  $('weekStrip').innerHTML = html;
+}
+function schedRowHTML(t){
+  const a = AREAS[t.area] || AREAS.growth;
+  return `
+    <div style="display:flex;align-items:center">
+    <button class="sched-row ${t.done?'done':''}" style="flex:1" onclick="toggleTask(${t.id}, event)">
+      <span class="time-pill">${esc(t.time)}</span>
+      <span>
+        <span class="s-title">${esc(t.title)}</span>
+        <span class="s-meta">${I(a.icon,11)} ${a.name}${t.meta?' — '+esc(t.meta):''}</span>
+      </span>
+      <span class="s-line"></span>
+      <span class="s-pts">+${t.pts}</span>
+      <span class="s-check">${I('check',12)}</span>
+    </button>
+    <button class="del-x" onclick="delTask(${t.id})" aria-label="delete task">${I('x',11)}</button>
+    </div>`;
+}
+function renderTasks(){
+  $('prioritySched').innerHTML = state.tasks.filter(t=>t.pri).map(schedRowHTML).join('') ||
+    '<div class="sched-row" style="border:none;color:var(--apres);font-size:13px">No focus tasks yet — add one with the + button and tick "today\u2019s focus".</div>';
+  $('taskSched').innerHTML = state.tasks.filter(t=>!t.pri).map(schedRowHTML).join('') ||
+    '<div class="sched-row" style="border:none;color:var(--apres);font-size:13px">Nothing else today. Add a task with the + button.</div>';
+  const done = state.tasks.filter(t=>t.done).length;
+  $('taskCount').textContent = done + ' of ' + state.tasks.length + ' done';
+}
+function toggleTask(id, ev){
+  if(document.body.classList.contains('managing')) return;
+  const t = state.tasks.find(t=>t.id===id);
+  t.done = !t.done;
+  if(t.done){
+    state.joy += t.pts;
+    floatPts(ev.clientX - 10, ev.clientY - 34, t.pts);
+    const cheers = ['well done','that\u2019s a rep','body said thank you','future you noticed','small and real'];
+    toast('<em>' + cheers[Math.floor(Math.random()*cheers.length)] + '</em> +' + t.pts + ' joy points');
+  } else { state.joy -= t.pts; }
+  save();
+  renderJoyNumbers();
+  renderTasks();
+  renderRewards();
+}
+function delTask(id){
+  state.tasks = state.tasks.filter(t=>t.id!==id);
+  save(); renderTasks();
+  toast('<em>removed</em> task deleted');
+}
+function newDayCheck(){
+  if(state.lastDay !== TODAY_ISO){
+    state.tasks.forEach(t=>t.done=false);
+    state.lastDay = TODAY_ISO;
+    save();
+  }
+}
+
+/* ================= REMINDERS (auto from events) ================= */
+const REMIND_ICONS = {adulting:'banknote', school:'doc', writing:'book', faith:'clipboard', fitness:'camera',
+  tsb:'cherry', music:'note', career:'code', growth:'sprout', rel:'heart'};
+function renderReminders(){
+  const upcoming = [];
+  Object.keys(state.events).sort().forEach(k=>{
+    if(k < TODAY_ISO) return;
+    const d = new Date(k + 'T00:00:00');
+    const days = Math.round((d - new Date(TODAY_ISO + 'T00:00:00')) / 86400000);
+    if(days > 30) return;
+    state.events[k].forEach(e=>upcoming.push({...e, days, k}));
+  });
+  const top = upcoming.slice(0, 5);
+  $('remindStack').innerHTML = top.map((r,i)=>`
+    <div class="remind-card ${i===0 && r.days<=7?'urgent':''}">
+      <div class="r-ic">${I(REMIND_ICONS[r.a]||'flag',19)}</div>
+      <div>
+        <div class="r-title">${esc(r.n)}</div>
+        <div class="r-when">${(AREAS[r.a]||{}).name||''} · ${r.k.slice(8)} ${MONTHS[parseInt(r.k.slice(5,7))-1].slice(0,3)}</div>
+      </div>
+      <div class="r-days"><b>${r.days}</b><small>${r.days===1?'DAY':'DAYS'}</small></div>
+    </div>`).join('') ||
+    '<div class="remind-card"><div class="r-title" style="color:var(--apres)">Nothing on the horizon — add events in the calendar.</div></div>';
+}
+
+/* ================= CALENDAR ================= */
+let calY = NOW.getFullYear(), calM = NOW.getMonth();
+let selectedISO = TODAY_ISO;
+function moveMonth(d){
+  calM += d;
+  if(calM<0){calM=11;calY--;} if(calM>11){calM=0;calY++;}
+  renderCalendar();
+}
+function renderCalendar(){
+  $('mnCur').textContent = MONTHS[calM] + (calY!==NOW.getFullYear()?' '+calY:'');
+  const dows = ['M','T','W','T','F','S','S'];
+  let html = dows.map(d=>`<div class="dow">${d}</div>`).join('');
+  const first = new Date(calY, calM, 1);
+  const offset = (first.getDay()+6)%7;
+  const daysIn = new Date(calY, calM+1, 0).getDate();
+  for(let i=0;i<offset;i++) html += '<div class="cal-cell dim"></div>';
+  for(let d=1; d<=daysIn; d++){
+    const k = iso(new Date(calY, calM, d));
+    const evs = state.events[k] || [];
+    const dots = '<i></i>'.repeat(Math.min(evs.length,3));
+    const isToday = k === TODAY_ISO;
+    html += `<button class="cal-cell ${isToday?'today-cell':''} ${k===selectedISO&&!isToday?'selected':''}" onclick="selectDay('${k}')">
+      ${d}<span class="cdots">${dots}</span></button>`;
+  }
+  $('calGrid').innerHTML = html;
+  renderDayCards();
+}
+function selectDay(k){ selectedISO = k; renderCalendar(); }
+function renderDayCards(){
+  const monthPrefix = calY + '-' + String(calM+1).padStart(2,'0');
+  const keys = Object.keys(state.events).filter(k=>k.startsWith(monthPrefix) && k>=selectedISO).sort().slice(0,5);
+  const rota = ['arctic','midnight','slopes','mountain'];
+  $('dayCards').innerHTML = keys.map((k,i)=>{
+    const s = SW[rota[i % rota.length]];
+    const d = new Date(k+'T00:00:00');
+    const urgentNote = (state.events[k]||[]).some(e=>/due|cat|exam|quiz/i.test(e.n)) ?
+      '<span class="dc-note">don\u2019t miss this</span>' : '';
+    return `
+    <div class="day-card ${s.dark?'dark':''}" style="background:${s.bg}">
+      <div class="dc-head">
+        <span class="dc-dw">${DOWS[d.getDay()]}</span>
+        <span class="dc-num">${d.getDate()}</span>
+        <span class="dc-mon">${MONTHS[d.getMonth()].toUpperCase()}</span>
+        ${urgentNote}
+      </div>
+      <div class="dc-events">
+        ${(state.events[k]||[]).map((e,j)=>`
+          <div class="dc-ev"><span class="ev-time">${esc(e.t)}</span><span class="ev-pill">${esc(e.n)}</span>
+          <button class="del-x" onclick="delEvent('${k}',${j})" aria-label="delete event">${I('x',10)}</button></div>`).join('')}
+      </div>
+    </div>`;
+  }).join('') || '<div class="remind-card"><div class="r-title" style="color:var(--apres)">No events this month yet — tap + to add one.</div></div>';
+}
+function delEvent(k, j){
+  state.events[k].splice(j,1);
+  if(!state.events[k].length) delete state.events[k];
+  save(); renderCalendar(); renderReminders(); renderWeekStrip();
+  toast('<em>removed</em> event deleted');
+}
+
+/* ================= NOTES ================= */
+let noteFilter = 'all';
+function renderNotePills(){
+  const pills = [
+    {k:'all', label:'All', count:state.notes.length},
+    {k:'fav', label:'Important', count:state.notes.filter(n=>n.fav).length},
+    {k:'faith', label:'Faith'}, {k:'tsb', label:'TSB'}, {k:'music', label:'Music'},
+    {k:'school', label:'School'}, {k:'growth', label:'Growth'}, {k:'rel', label:'People'},
+  ];
+  $('notePills').innerHTML = pills.map(p=>`
+    <button class="pill ${noteFilter===p.k?'active':''}" onclick="setNoteFilter('${p.k}')">
+      ${p.label}${p.count!==undefined?`<span class="count">${p.count}</span>`:''}
+    </button>`).join('');
+}
+function setNoteFilter(k){ noteFilter = k; renderNotePills(); renderNotes(); }
+function renderNotes(){
+  let list = state.notes;
+  if(noteFilter === 'fav') list = list.filter(n=>n.fav);
+  else if(noteFilter !== 'all') list = list.filter(n=>n.area === noteFilter);
+  $('notesMasonry').innerHTML = list.map(n=>{
+    const a = AREAS[n.area] || AREAS.growth;
+    const s = SW[n.sw] || SW.arctic;
+    return `
+    <button class="note-card ${s.dark?'on-dark':''}" style="background:${s.bg}" onclick="openNote(${n.id})">
+      <span class="heart">${I(n.fav?'heartFill':'heart',13)}</span>
+      <div class="n-title">${esc(n.title)}</div>
+      ${n.check ? `<ul class="mini-check">${n.check.map(c=>`<li class="${c.c?'c':''}">${esc(c.t)}</li>`).join('')}</ul>` : ''}
+      ${n.lead && !n.check ? `<div class="n-body">${esc(n.lead)}</div>` : ''}
+      ${!n.lead && !n.check && n.body ? `<div class="n-body">${esc(n.body).slice(0,90)}${n.body.length>90?'…':''}</div>` : ''}
+      ${n.it ? `<span class="n-it">${esc(n.it)}</span>` : ''}
+      <div class="n-tag">${I(a.icon,12)} ${a.name}</div>
+      <div class="n-date">${esc(n.date)}</div>
+    </button>`;
+  }).join('') || '<div class="remind-card" style="break-inside:avoid"><div class="r-title" style="color:var(--apres)">No notes here yet.</div></div>';
+}
+let openNoteId = null;
+function openNote(id){
+  const n = state.notes.find(n=>n.id===id);
+  openNoteId = id;
+  const a = AREAS[n.area] || AREAS.growth;
+  const aSw = SW[a.sw];
+  $('ndShared').innerHTML = I('lock',12) + ' Just me';
+  $('noteDetailBody').innerHTML = `
+    <h2 class="nd-title">${esc(n.title).replace(' ', '<br>')}</h2>
+    ${n.lead ? `<p class="nd-lead"><b>${esc(n.title)}.</b> <span class="hl">${esc(n.lead)}</span></p>` : ''}
+    ${n.check ? `<div class="card" style="background:${(SW[n.sw]||SW.arctic).bg};margin-top:6px;${(SW[n.sw]||SW.arctic).dark?'color:var(--arctic)':''}"><ul class="mini-check" style="margin-top:0">${n.check.map(c=>`<li class="${c.c?'c':''}">${esc(c.t)}</li>`).join('')}</ul></div>` : ''}
+    ${n.body ? `<p class="nd-body">${esc(n.body)}</p>` : ''}
+    <div class="nd-tools">
+      <button class="tool main" onclick="openModal('note')">${I('plus',20)}</button>
+      <button class="tool">${I('camera',18)}</button>
+      <button class="tool">${I('edit',17)}</button>
+      <button class="tool" onclick="delNote(${n.id})">${I('trash',17)}</button>
+    </div>
+    ${n.it ? `<div class="nd-it-zone">${esc(n.it)} —</div>` : ''}
+    <div class="nd-tag-row">
+      <span class="nd-area-chip" style="background:${aSw.bg};color:${aSw.dark?'var(--arctic)':'var(--ink)'}">${I(a.icon,13)} ${a.name}</span>
+      <span class="nd-area-chip" style="background:rgba(9,15,21,.08)">${esc(n.date)}</span>
+    </div>`;
+  go('note-detail');
+}
+function delNote(id){
+  state.notes = state.notes.filter(n=>n.id!==id);
+  save(); renderNotes(); renderNotePills();
+  toast('<em>removed</em> note deleted');
+  go('notes');
+}
+
+/* ================= AREAS ================= */
+function renderAreas(){
+  $('areasGrid').innerHTML = Object.entries(AREAS).map(([k,a])=>{
+    const s = SW[a.sw];
+    return `
+    <button class="area-card ${s.dark?'dark':''}" style="background:${s.bg}" onclick="openArea('${k}')">
+      <div><span class="a-ic">${I(a.icon,22)}</span>
+        <div class="a-name">${a.name}</div>
+        <div class="a-phase">${a.phase}</div>
+      </div>
+      <div>
+        <div class="a-bar"><i style="width:${a.pct}%"></i></div>
+        <div class="a-pct">${a.pct}% toward the goal</div>
+      </div>
+    </button>`;
+  }).join('');
+}
+function openArea(k){
+  const a = AREAS[k];
+  const s = SW[a.sw];
+  $('areaDetailBody').innerHTML = `
+    <div class="ad-hero ${s.dark?'dark':''}" style="background:${s.bg}">
+      ${I(a.icon,30)}
+      <h2>${a.name}</h2>
+      <p class="ad-vision">${a.vision}</p>
+      <span class="ad-phase-chip">${a.phase}</span>
+    </div>
+    <div class="big-goal">
+      <div class="bg-label">The big goal</div>
+      <div class="bg-text">${a.goal}</div>
+      <div class="bg-bar"><i style="width:${a.pct}%"></i></div>
+      <div class="bg-row"><span>${a.pct}% there</span><span>${a.goalNote}</span></div>
+    </div>
+    <div class="section-label">Milestones <span class="more">one at a time</span></div>
+    <div class="milestones card" style="margin:0 20px">
+      ${a.miles.map(m=>`
+        <div class="mile ${m.d?'done':''}">
+          <span class="m-dot"></span>
+          <span class="m-text">${m.t}</span>
+          <span class="m-when">${m.w}</span>
+        </div>`).join('')}
+    </div>`;
+  go('area-detail');
+}
+function renderChallenges(){
+  $('chalStack').innerHTML = state.challenges.map(c=>{
+    const a = AREAS[c.area] || AREAS.growth;
+    return `
+    <div class="chal-card">
+      <div class="ch-q">${esc(c.q)}</div>
+      <div class="ch-sec"><div class="ch-lbl">How I moved through it</div><div class="ch-txt">${esc(c.how)}</div></div>
+      <div class="ch-lesson">${esc(c.lesson)}</div>
+      <div class="ch-tagrow">
+        <span class="ch-area">${I(a.icon,12)} ${a.name}</span>
+        <span class="ch-date">${esc(c.date)}</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ================= JOY ================= */
+function renderJoyNumbers(){
+  $('joyChipPts').textContent = state.joy;
+  $('joyBigPts').textContent = state.joy;
+}
+function renderRewards(){
+  $('rewardStack').innerHTML = state.rewards.map(r=>`
+    <div class="reward-card ${r.redeemed?'redeemed':''}">
+      <div class="rw-ic">${I(r.icon||'gift',19)}</div>
+      <div>
+        <div class="rw-name">${esc(r.name)}</div>
+        <div class="rw-cost">${r.cost} joy points</div>
+      </div>
+      <button class="redeem" ${state.joy < r.cost || r.redeemed ? 'disabled':''} onclick="redeem(${r.id})">
+        ${r.redeemed ? 'Enjoyed' : 'Redeem'}
+      </button>
+      <button class="del-x" onclick="delReward(${r.id})" aria-label="delete reward">${I('x',11)}</button>
+    </div>`).join('');
+}
+function redeem(id){
+  const r = state.rewards.find(r=>r.id===id);
+  if(state.joy < r.cost || r.redeemed) return;
+  state.joy -= r.cost;
+  r.redeemed = true;
+  save(); renderJoyNumbers(); renderRewards();
+  toast('<em>enjoy it fully</em> — redeemed, zero guilt');
+}
+function delReward(id){
+  state.rewards = state.rewards.filter(r=>r.id!==id);
+  save(); renderRewards();
+  toast('<em>removed</em> reward deleted');
+}
+
+/* ================= MODAL ================= */
+const AREA_OPTIONS = () => Object.entries(AREAS).map(([k,a])=>`<option value="${k}">${a.name}</option>`).join('');
+let pickedSw = 'arctic';
+function openModal(kind){
+  const box = $('modalBox');
+  if(kind === 'task'){
+    box.innerHTML = `
+      <h3>New <em>task</em></h3>
+      <div class="m-field"><label>What</label><input type="text" id="mTitle" placeholder="e.g. Khan Academy — 30 min"></div>
+      <div class="m-field"><label>Time</label><input type="text" id="mTime" placeholder="e.g. 4:00 pm"></div>
+      <div class="m-field"><label>Life area</label><select id="mArea">${AREA_OPTIONS()}</select></div>
+      <div class="m-field"><label>Joy points</label><select id="mPts">
+        <option value="5">5 — regular task</option><option value="15">15 — focus block</option><option value="25">25 — big rock</option></select></div>
+      <div class="m-check"><input type="checkbox" id="mPri"><span>This is one of today's three focus tasks</span></div>
+      <div class="m-actions">
+        <button class="m-cancel" onclick="closeModal()">Cancel</button>
+        <button class="m-save" onclick="saveTask()">Add task</button>
+      </div>`;
+  } else if(kind === 'note'){
+    pickedSw = 'arctic';
+    box.innerHTML = `
+      <h3>New <em>note</em></h3>
+      <div class="m-field"><label>Title</label><input type="text" id="mTitle" placeholder="e.g. Session 6 ideas"></div>
+      <div class="m-field"><label>The note</label><textarea id="mBody" placeholder="Write it down before it leaves…"></textarea></div>
+      <div class="m-field"><label>Life area</label><select id="mArea">${AREA_OPTIONS()}</select></div>
+      <div class="m-field"><label>Card color</label><div class="sw-row">
+        ${['arctic','card','slopes','mountain','midnight'].map(k=>
+          `<button class="sw-pick ${k==='arctic'?'on':''}" data-sw="${k}" style="background:${SW[k].bg}" onclick="pickSw(this)"></button>`).join('')}
+      </div></div>
+      <div class="m-check"><input type="checkbox" id="mFav"><span>Mark as important</span></div>
+      <div class="m-actions">
+        <button class="m-cancel" onclick="closeModal()">Cancel</button>
+        <button class="m-save" onclick="saveNote()">Save note</button>
+      </div>`;
+  } else if(kind === 'event'){
+    box.innerHTML = `
+      <h3>New <em>event</em></h3>
+      <div class="m-field"><label>What</label><input type="text" id="mTitle" placeholder="e.g. CG hangout planning"></div>
+      <div class="m-field"><label>Date</label><input type="date" id="mDate" value="${selectedISO}"></div>
+      <div class="m-field"><label>Time</label><input type="text" id="mTime" placeholder="e.g. 4:00p"></div>
+      <div class="m-field"><label>Life area</label><select id="mArea">${AREA_OPTIONS()}</select></div>
+      <div class="m-actions">
+        <button class="m-cancel" onclick="closeModal()">Cancel</button>
+        <button class="m-save" onclick="saveEvent()">Add event</button>
+      </div>`;
+  } else if(kind === 'reward'){
+    box.innerHTML = `
+      <h3>New <em>reward</em></h3>
+      <div class="m-field"><label>The treat</label><input type="text" id="mTitle" placeholder="e.g. Bomboloni run"></div>
+      <div class="m-field"><label>Cost in joy points</label><input type="number" id="mCost" placeholder="50" min="5"></div>
+      <div class="m-actions">
+        <button class="m-cancel" onclick="closeModal()">Cancel</button>
+        <button class="m-save" onclick="saveReward()">Add reward</button>
+      </div>`;
+  } else if(kind === 'challenge'){
+    box.innerHTML = `
+      <h3>Log a <em>challenge</em></h3>
+      <div class="m-field"><label>What happened</label><input type="text" id="mTitle" placeholder="Name the moment"></div>
+      <div class="m-field"><label>How I moved through it</label><textarea id="mHow"></textarea></div>
+      <div class="m-field"><label>The lesson</label><textarea id="mLesson" style="min-height:60px"></textarea></div>
+      <div class="m-field"><label>Life area</label><select id="mArea">${AREA_OPTIONS()}</select></div>
+      <div class="m-actions">
+        <button class="m-cancel" onclick="closeModal()">Cancel</button>
+        <button class="m-save" onclick="saveChallenge()">Log it</button>
+      </div>`;
+  }
+  $('modalBack').classList.add('open');
+}
+function pickSw(el){
+  pickedSw = el.dataset.sw;
+  document.querySelectorAll('.sw-pick').forEach(b=>b.classList.toggle('on', b===el));
+}
+function closeModal(){ $('modalBack').classList.remove('open'); }
+function saveTask(){
+  const title = $('mTitle').value.trim();
+  if(!title){ toast('<em>hold on</em> the task needs a name'); return; }
+  state.tasks.push({id:Date.now(), area:$('mArea').value, time:$('mTime').value.trim()||'—',
+    title, meta:'', pts:parseInt($('mPts').value), done:false, pri:$('mPri').checked});
+  save(); renderTasks(); closeModal();
+  toast('<em>added</em> it\u2019s on the schedule');
+}
+function saveNote(){
+  const title = $('mTitle').value.trim();
+  if(!title){ toast('<em>hold on</em> the note needs a title'); return; }
+  state.notes.unshift({id:Date.now(), sw:pickedSw, title, area:$('mArea').value,
+    date:shortDate(NOW), fav:$('mFav').checked, lead:'', body:$('mBody').value.trim()});
+  save(); renderNotes(); renderNotePills(); closeModal();
+  toast('<em>saved</em> note added');
+}
+function saveEvent(){
+  const title = $('mTitle').value.trim();
+  const k = $('mDate').value;
+  if(!title || !k){ toast('<em>hold on</em> name and date needed'); return; }
+  if(!state.events[k]) state.events[k] = [];
+  state.events[k].push({t:$('mTime').value.trim()||'—', n:title, a:$('mArea').value});
+  save(); selectedISO = k;
+  const d = new Date(k+'T00:00:00'); calY = d.getFullYear(); calM = d.getMonth();
+  renderCalendar(); renderReminders(); renderWeekStrip(); closeModal();
+  toast('<em>added</em> it\u2019s in the diary');
+}
+function saveReward(){
+  const title = $('mTitle').value.trim();
+  const cost = parseInt($('mCost').value);
+  if(!title || !cost){ toast('<em>hold on</em> name and cost needed'); return; }
+  state.rewards.push({id:Date.now(), icon:'gift', name:title, cost, redeemed:false});
+  save(); renderRewards(); closeModal();
+  toast('<em>added</em> something to look forward to');
+}
+function saveChallenge(){
+  const q = $('mTitle').value.trim();
+  if(!q){ toast('<em>hold on</em> name the moment first'); return; }
+  state.challenges.unshift({id:Date.now(), q, how:$('mHow').value.trim(), lesson:$('mLesson').value.trim(),
+    area:$('mArea').value, date:shortDate(NOW)});
+  save(); renderChallenges(); closeModal();
+  toast('<em>logged</em> that\u2019s how you grow');
+}
+
+/* ================= BACKUP / RESTORE ================= */
+function backupData(){
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'milele-os-backup-' + TODAY_ISO + '.json';
+  a.click();
+  toast('<em>safe</em> backup downloaded');
+}
+function restoreData(ev){
+  const file = ev.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if(!data.tasks || !data.notes) throw new Error('bad file');
+      state = data;
+      save(); initRender();
+      toast('<em>restored</em> welcome back');
+    } catch(e){ toast('<em>hmm</em> that file doesn\u2019t look like a backup'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ================= INIT ================= */
+function initRender(){
+  renderTodayHeader();
+  renderWeekStrip();
+  renderTasks();
+  renderReminders();
+  renderCalendar();
+  renderNotePills();
+  renderNotes();
+  renderAreas();
+  renderChallenges();
+  renderJoyNumbers();
+  renderRewards();
+}
+load();
+newDayCheck();
+if(!canStore) $('storageNote').style.display = 'block';
+$('ndBackBtn').innerHTML = I('chevL',18);
+$('ndShareBtn').innerHTML = I('arrowUp',16);
+$('adBackBtn').innerHTML = I('chevL',18);
+$('adEditBtn').innerHTML = I('edit',16);
+$('fab').innerHTML = I('plus',22);
+renderNav('today');
+initRender();
+
+/* ================= PWA: offline + install ================= */
+if('serviceWorker' in navigator && location.protocol === 'https:'){
+  try { navigator.serviceWorker.register('sw.js'); } catch(e){}
+}
+</script>
+</body>
+</html>
