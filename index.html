@@ -798,7 +798,7 @@ function renderNav(active){
       ${I(n.icon,19)}<span class="bn-lbl">${n.label}</span>
     </button>`).join('');
 }
-function go(page){
+function go(page, fromPop){
   currentPage = page;
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   $('page-' + page).classList.add('active');
@@ -806,8 +806,20 @@ function go(page){
   const fabPages = {today:1, notes:1, calendar:1};
   $('fab').style.display = fabPages[page] ? 'grid' : 'none';
   document.body.classList.remove('managing');
+  if(!fromPop && (!history.state || history.state.page !== page || history.state.modal)){
+    try { history.pushState({page}, ''); } catch(e){}
+  }
   window.scrollTo({top:0});
 }
+window.addEventListener('popstate', e => {
+  const st = e.state || {page:'today'};
+  if($('modalBack').classList.contains('open')){
+    $('modalBack').classList.remove('open');
+    editTaskId = null;
+    if(st.page === currentPage) return;
+  }
+  go(st.page || 'today', true);
+});
 function fabAction(){
   if(currentPage === 'today') openModal('task');
   else if(currentPage === 'notes') openModal('note');
@@ -876,7 +888,7 @@ function renderTasks(){
   $('taskCount').textContent = managing ? 'showing all days' : done + ' of ' + todays.length + ' done';
 }
 function toggleTask(id, ev){
-  if(document.body.classList.contains('managing')) return;
+  if(document.body.classList.contains('managing')){ openModal('task', id); return; }
   const t = state.tasks.find(t=>t.id===id);
   t.done = !t.done;
   if(t.done){
@@ -1168,26 +1180,30 @@ function delReward(id){
 const AREA_OPTIONS = () => Object.entries(AREAS).map(([k,a])=>`<option value="${k}">${a.name}</option>`).join('');
 let pickedSw = 'arctic';
 let pickedDays = [];
-function openModal(kind){
+let editTaskId = null;
+function openModal(kind, editId){
   const box = $('modalBox');
   if(kind === 'task'){
-    pickedDays = [];
+    editTaskId = editId || null;
+    const t = editTaskId ? state.tasks.find(x=>x.id===editTaskId) : null;
+    pickedDays = t ? [...(t.days||[])] : [];
     box.innerHTML = `
-      <h3>New <em>task</em></h3>
-      <div class="m-field"><label>What</label><input type="text" id="mTitle" placeholder="e.g. Khan Academy — 30 min"></div>
-      <div class="m-field"><label>Time</label><input type="text" id="mTime" placeholder="e.g. 4:00 pm"></div>
+      <h3>${t?'Edit':'New'} <em>task</em></h3>
+      <div class="m-field"><label>What</label><input type="text" id="mTitle" placeholder="e.g. Khan Academy — 30 min" value="${t?esc(t.title):''}"></div>
+      <div class="m-field"><label>Time</label><input type="text" id="mTime" placeholder="e.g. 4:00 pm" value="${t?esc(t.time):''}"></div>
       <div class="m-field"><label>Life area</label><select id="mArea">${AREA_OPTIONS()}</select></div>
       <div class="m-field"><label>Which days · leave blank for every day</label>
         <div class="day-row">${['mon','tue','wed','thu','fri','sat','sun'].map(d=>
-          `<button class="day-tog" data-d="${d}" onclick="togDay(this)">${d[0].toUpperCase()+d[1]}</button>`).join('')}
+          `<button class="day-tog ${pickedDays.includes(d)?'on':''}" data-d="${d}" onclick="togDay(this)">${d[0].toUpperCase()+d[1]}</button>`).join('')}
         </div></div>
       <div class="m-field"><label>Joy points</label><select id="mPts">
         <option value="5">5 — regular task</option><option value="15">15 — focus block</option><option value="25">25 — big rock</option></select></div>
-      <div class="m-check"><input type="checkbox" id="mPri"><span>This is one of today's three focus tasks</span></div>
+      <div class="m-check"><input type="checkbox" id="mPri" ${t&&t.pri?'checked':''}><span>This is one of today's three focus tasks</span></div>
       <div class="m-actions">
         <button class="m-cancel" onclick="closeModal()">Cancel</button>
-        <button class="m-save" onclick="saveTask()">Add task</button>
+        <button class="m-save" onclick="saveTask()">${t?'Save changes':'Add task'}</button>
       </div>`;
+    if(t){ $('mArea').value = t.area; $('mPts').value = String(t.pts); }
   } else if(kind === 'area'){
     const a = AREAS[currentAreaId];
     box.innerHTML = `
@@ -1259,12 +1275,17 @@ function openModal(kind){
       </div>`;
   }
   $('modalBack').classList.add('open');
+  try { history.pushState({page: currentPage, modal: true}, ''); } catch(e){}
 }
 function pickSw(el){
   pickedSw = el.dataset.sw;
   document.querySelectorAll('.sw-pick').forEach(b=>b.classList.toggle('on', b===el));
 }
-function closeModal(){ $('modalBack').classList.remove('open'); }
+function closeModal(){
+  $('modalBack').classList.remove('open');
+  editTaskId = null;
+  if(history.state && history.state.modal){ try { history.back(); } catch(e){} }
+}
 function togDay(el){
   const d = el.dataset.d;
   if(pickedDays.includes(d)) pickedDays = pickedDays.filter(x=>x!==d);
@@ -1291,6 +1312,18 @@ function saveMile(){
 function saveTask(){
   const title = $('mTitle').value.trim();
   if(!title){ toast('<em>hold on</em> the task needs a name'); return; }
+  if(editTaskId){
+    const t = state.tasks.find(x=>x.id===editTaskId);
+    t.title = title;
+    t.time = $('mTime').value.trim() || '—';
+    t.area = $('mArea').value;
+    t.pts = parseInt($('mPts').value);
+    t.pri = $('mPri').checked;
+    t.days = [...pickedDays];
+    save(); renderTasks(); closeModal();
+    toast('<em>saved</em> task updated');
+    return;
+  }
   state.tasks.push({id:Date.now(), area:$('mArea').value, time:$('mTime').value.trim()||'—',
     title, meta:'', pts:parseInt($('mPts').value), done:false, pri:$('mPri').checked, days:[...pickedDays]});
   save(); renderTasks(); closeModal();
@@ -1382,6 +1415,7 @@ $('adEditBtn').innerHTML = I('edit',16);
 $('adEditBtn').onclick = () => openModal('area');
 $('fab').innerHTML = I('plus',22);
 renderNav('today');
+try { history.replaceState({page:'today'}, ''); } catch(e){}
 initRender();
 
 /* ================= PWA: offline + install ================= */
