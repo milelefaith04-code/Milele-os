@@ -443,6 +443,12 @@ body.managing .s-check,body.managing .s-pts{display:none}
 .modal .sw-pick{width:38px;height:38px;border-radius:50%;border:2px solid transparent}
 .modal .sw-pick.on{border-color:var(--midnight);outline:2px solid var(--paper);outline-offset:-5px}
 .modal .m-actions{display:flex;gap:10px;margin-top:24px}
+.modal .day-row{display:flex;gap:6px;flex-wrap:wrap}
+.modal .day-tog{
+  width:40px;height:40px;border-radius:50%;border:1.3px solid rgba(9,15,21,.3);
+  font-size:11px;font-weight:600;color:var(--ink);background:var(--card-2);
+}
+.modal .day-tog.on{background:var(--midnight);color:var(--arctic);border-color:var(--midnight)}
 .modal .m-save{
   flex:1;background:var(--midnight);color:var(--arctic);border-radius:999px;padding:15px;
   font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;
@@ -627,8 +633,9 @@ const SW = {
   midnight: {bg:'#090F15', dark:true,  label:'Midnight'},
 };
 
-/* ================= STATIC: THE 10 AREAS ================= */
-const AREAS = {
+/* ================= THE 10 AREAS (defaults — live copy is in state.areas, fully editable in-app) ================= */
+let AREAS = null;
+const DEFAULT_AREAS = {
   faith:    {name:'Faith & Ministry', icon:'book', sw:'arctic', phase:'Testing series · Session 5 next',
     vision:'Faith as the foundation, not a compartment. Walking with God daily — and leading others to do the same.',
     goal:'Finish the Testing series strong & read the Bible cover to cover', pct:55, goalNote:'Session 5 of 8 · Bible plan running',
@@ -636,7 +643,7 @@ const AREAS = {
   school:   {name:'School', icon:'cap', sw:'midnight', phase:'T1 · Week 4 of 15',
     vision:'3.6 GPA, zero retakes, graduate May 2029. Score 81+ in everything — one unit at a time.',
     goal:'Trimester 1: A- or better in all 4 units', pct:27, goalNote:'MAT 120 · ENG 113X · SIT 122 · SIT 101',
-    miles:[{t:'1st installment paid',w:'May 18',d:true},{t:'2nd installment KES 28,711.50',w:'Jun 18',d:false},{t:'OS CAT 1 (SIT 122)',w:'~Jun 24',d:false},{t:'Of Pawns & Players reading quiz',w:'~Jun 25',d:false}]},
+    miles:[{t:'1st installment paid',w:'May 18',d:true},{t:'2nd fee installment',w:'Jun 18',d:false},{t:'OS CAT 1 (SIT 122)',w:'~Jun 24',d:false},{t:'Of Pawns & Players reading quiz',w:'~Jun 25',d:false}]},
   career:   {name:'Career & Tech', icon:'code', sw:'mountain', phase:'Track 1 · Web Dev',
     vision:'Web dev, then data, then ML and AI. Build real things, ship real projects, stay in the know.',
     goal:'Track 1 done by Dec 2026 — this Life OS site is the capstone', pct:12, goalNote:'freeCodeCamp + P1→P4 projects',
@@ -664,11 +671,11 @@ const AREAS = {
   adulting: {name:'Adulting', icon:'home', sw:'card', phase:'Bucket system redesign',
     vision:'Genuine self-sufficiency in 2–3 years: own space, own income, papers in order, boundaries said out loud.',
     goal:'Resilient money system + 2-month emergency buffer', pct:25, goalNote:'Weekly 5-min check · monthly audit',
-    miles:[{t:'Weekly budget check (5 min)',w:'Mon',d:false},{t:'Remind dad: installment Jun 18',w:'now',d:false},{t:'June audit day (1 hr)',w:'Jun 28',d:false},{t:'Matatu-only plan: 600/day holds',w:'daily',d:false}]},
+    miles:[{t:'Weekly budget check (5 min)',w:'Mon',d:false},{t:'Fee installment reminder — Jun 18',w:'now',d:false},{t:'June audit day (1 hr)',w:'Jun 28',d:false},{t:'Matatu-only plan: 600/day holds',w:'daily',d:false}]},
   rel:      {name:'Relationships', icon:'heart', sw:'apres', phase:'5 circles · guarding the anchors',
     vision:'Give from fullness, not emptiness. Anchors watered, drains released, guilt retired as a compass.',
-    goal:'Weekly Yasmin check-in + monthly joy-only social thing', pct:40, goalNote:'Quarterly family conversation queued',
-    miles:[{t:'Yasmin check-in',w:'weekly',d:true},{t:'One purely-for-joy hangout',w:'Jun',d:false},{t:'Drain circle audit',w:'Jun 30',d:false},{t:'CG hangout planning (20 ppl)',w:'Sep',d:false}]},
+    goal:'Weekly anchor check-in + monthly joy-only social thing', pct:40, goalNote:'Quarterly family conversation queued',
+    miles:[{t:'Anchor check-in',w:'weekly',d:true},{t:'One purely-for-joy hangout',w:'Jun',d:false},{t:'Drain circle audit',w:'Jun 30',d:false},{t:'CG hangout planning (20 ppl)',w:'Sep',d:false}]},
 };
 
 /* ================= SEED DATA (first run only) ================= */
@@ -687,44 +694,17 @@ const SEED = {
     {id:9, area:'tsb',     time:'7:30 pm', title:'Cost the samosa batch',            meta:'recipe card v1 — grams, not "a bit"', pts:5, done:false, pri:false},
   ],
   events: {
-    '2026-06-12':[{t:'4:00p',n:'CG prep — Session 5',a:'faith'},{t:'6:00p',n:'Co-leader sync',a:'faith'}],
-    '2026-06-13':[{t:'10:00a',n:'Samosa test #2',a:'tsb'},{t:'4:00p',n:'Badminton scout at Daystar',a:'fitness'}],
-    '2026-06-14':[{t:'9:00a',n:'Church + worship team',a:'faith'},{t:'7:00p',n:'Weekly reflection',a:'growth'}],
-    '2026-06-15':[{t:'8:00a',n:'Budget check — 5 min',a:'adulting'},{t:'2:00p',n:'MAT 120 class',a:'school'}],
-    '2026-06-17':[{t:'8:00a',n:'SIT 122 lab',a:'school'},{t:'5:00p',n:'Focus block — guitar',a:'music'}],
-    '2026-06-18':[{t:'due',n:'2nd installment DUE',a:'adulting'}],
-    '2026-06-21':[{t:'9:00a',n:'Church + worship',a:'faith'},{t:'3:00p',n:'Yasmin check-in',a:'rel'}],
-    '2026-06-24':[{t:'8:00a',n:'OS CAT 1',a:'school'}],
-    '2026-06-25':[{t:'5:30p',n:'ENG quiz — Pawns & Players',a:'writing'}],
-    '2026-06-28':[{t:'10:00a',n:'June audit day',a:'adulting'},{t:'4:00p',n:'Deep session with Clio',a:'growth'}],
-    '2026-06-30':[{t:'eod',n:'Session 5 due + video verdict',a:'faith'},{t:'pm',n:'Progress photo',a:'fitness'}],
+    '2026-06-18':[{t:'due',n:'School fee installment',a:'adulting'}],
+    '2026-06-24':[{t:'8:00a',n:'OS CAT 1 — SIT 122',a:'school'}],
+    '2026-06-25':[{t:'5:30p',n:'ENG 113X reading quiz',a:'writing'}],
+    '2026-06-30':[{t:'eod',n:'Session 5 due',a:'faith'}],
   },
   notes: [
-    {id:1, sw:'arctic',   title:'Plan for the day', area:'growth', date:'Jun 11, 2026', fav:true,
-     check:[{t:'Buy ENG reader',c:true},{t:'Khan 30 min',c:true},{t:'Workout A',c:false},{t:'Journal before bed',c:false}], lead:'', body:''},
-    {id:2, sw:'midnight', title:'Session 5 ideas', area:'faith', date:'Jun 10, 2026', fav:true,
-     lead:'The wilderness wasn\u2019t punishment — it was preparation.',
-     body:'Jesus was LED by the Spirit into the desert. Testing isn\u2019t God losing track of you. Pull the thread from Exodus: bread, presence, identity. Q1: where do we confuse testing with abandonment?', it:'this one preaches'},
-    {id:3, sw:'mountain', title:'Lyric idea', area:'music', date:'Jun 9, 2026', fav:false,
-     lead:'"You meet me in the middle of my almost-faith…"',
-     body:'Came during free play — Cmaj7 to Am9, slow. Voice memo saved. Maybe the bridge lives a third up.', it:'don\u2019t lose this'},
-    {id:4, sw:'card',     title:'Samosa v1 — test notes', area:'tsb', date:'Jun 8, 2026', fav:false,
-     lead:'Batch of 24 · cost KES 410 · about 17 per piece.',
-     body:'Pastry too thick on 6 of them — roll to 2mm next time. Filling ratio perfect. Fry at medium, not high. Same result twice now — one more test and it\u2019s standardized.'},
-    {id:5, sw:'slopes',   title:'Prayer list', area:'faith', date:'Jun 8, 2026', fav:true, lead:'',
-     body:'Mum\u2019s week at work. Yasmin\u2019s interview. The CG — that Session 5 lands. Dad — softness, somewhere to start. Me — courage to keep showing up small.'},
-    {id:6, sw:'arctic',   title:'Flexbox finally clicked', area:'career', date:'Jun 7, 2026', fav:false,
-     lead:'justify-content is the main axis. align-items is the cross axis.',
-     body:'That\u2019s it. That\u2019s the whole thing I was confused about for a week. gap beats margins for spacing siblings. Built the practice nav in 20 minutes.'},
-    {id:7, sw:'mountain', title:'Voicings to steal', area:'music', date:'Jun 5, 2026', fav:false,
-     lead:'Cmaj7 (x32000) → Am9 (x02410) → Fmaj7 (x33210)',
-     body:'The Bruno Major move: let the open strings ring through the change. Sounds expensive. Costs nothing.'},
-    {id:8, sw:'card',     title:'Baseline numbers', area:'fitness', date:'Jun 3, 2026', fav:false,
-     lead:'Squats per minute: 22 · Plank: 48s · Ladder: rung 1 (wall)',
-     body:'November-me is going to read this and smile. Same spot, same light for photos. No scale — strength numbers only.'},
-    {id:9, sw:'midnight', title:'Guilt is not a compass', area:'rel', date:'Jun 2, 2026', fav:true,
-     lead:'Said no to the hangout. Guilt came anyway. It passed.',
-     body:'The guilt showing up doesn\u2019t mean I was wrong. It\u2019s old wiring firing on schedule. I felt MORE myself by 9pm. Logging this as evidence.', it:'evidence'},
+    {id:1, sw:'arctic', title:'Welcome to your notes', area:'growth', date:'Today', fav:true,
+     lead:'Colored cards, one thought each.',
+     body:'Tap + to write one. Pick a card color, tag a life area, mark the important ones with a heart. Filter with the pills above.', it:'start here'},
+    {id:2, sw:'midnight', title:'A checklist note', area:'growth', date:'Today', fav:false,
+     check:[{t:'Notes can hold checklists',c:true},{t:'Like this one',c:true},{t:'Add your own',c:false}], lead:'', body:''},
   ],
   rewards: [
     {id:1, icon:'cup',    name:'Bubble tea run',              cost:50,  redeemed:false},
@@ -734,15 +714,9 @@ const SEED = {
     {id:5, icon:'guitar', name:'New strings fund unlock',     cost:150, redeemed:false},
   ],
   challenges: [
-    {id:1, q:'Caught a fantasy spiral before it ate the evening', area:'growth', date:'Jun 10, 2026',
-     how:'Noticed it in my chest first — the floaty, scripted feeling. Named it out loud. Put the phone in the other room and played guitar instead.',
-     lesson:'The spiral has a body signature. If I catch the chest-feeling, I get to choose.'},
-    {id:2, q:'Math panic during the MAT 120 quiz', area:'school', date:'Jun 4, 2026',
-     how:'Old story showed up: "you\u2019re bad at this." Breathed, skipped the hard one, came back to it. Finished. Started the Khan recovery plan that same evening.',
-     lesson:'Panic is old data, not a prophecy. The recovery plan exists because I wrote it for exactly this moment.'},
-    {id:3, q:'Said no to a drain-circle hangout', area:'rel', date:'Jun 2, 2026',
-     how:'"I can\u2019t make it." No essay, no excuse, no over-explaining. Sat with the guilt for an hour. It passed. Spent the evening on Session 5 prep instead.',
-     lesson:'Guilt will come anyway — it\u2019s wiring, not truth. I don\u2019t owe an explanation to keep the peace.'},
+    {id:1, q:'An example: name a hard moment here', area:'growth', date:'Today',
+     how:'This is where you write how you actually moved through it — the real version, not the tidy one.',
+     lesson:'And this is the lesson, in one line you\u2019ll want to reread.'},
   ],
 };
 
@@ -756,14 +730,21 @@ try {
 } catch(e){ canStore = false; }
 
 let state;
+function migrate(s){
+  if(!s.areas) s.areas = JSON.parse(JSON.stringify(DEFAULT_AREAS));
+  Object.keys(DEFAULT_AREAS).forEach(k=>{ if(!s.areas[k]) s.areas[k] = JSON.parse(JSON.stringify(DEFAULT_AREAS[k])); });
+  (s.tasks||[]).forEach(t=>{ if(!t.days) t.days = []; });
+  return s;
+}
 function load(){
   if(canStore){
     try {
       const raw = window.localStorage.getItem(STORE_KEY);
-      if(raw){ state = JSON.parse(raw); return; }
+      if(raw){ state = migrate(JSON.parse(raw)); AREAS = state.areas; return; }
     } catch(e){}
   }
-  state = JSON.parse(JSON.stringify(SEED));
+  state = migrate(JSON.parse(JSON.stringify(SEED)));
+  AREAS = state.areas;
 }
 function save(){
   if(!canStore) return;
@@ -834,6 +815,7 @@ function fabAction(){
 }
 function toggleManage(){
   document.body.classList.toggle('managing');
+  renderTasks();
 }
 
 /* ================= TODAY ================= */
@@ -858,6 +840,12 @@ function renderWeekStrip(){
   }
   $('weekStrip').innerHTML = html;
 }
+const DOW_KEYS = ['sun','mon','tue','wed','thu','fri','sat'];
+const TODAY_DOW = DOW_KEYS[NOW.getDay()];
+function dayBadge(t){
+  if(!t.days || !t.days.length) return '';
+  return ' · ' + t.days.map(d=>d[0].toUpperCase()+d[1]).join(' ');
+}
 function schedRowHTML(t){
   const a = AREAS[t.area] || AREAS.growth;
   return `
@@ -866,7 +854,7 @@ function schedRowHTML(t){
       <span class="time-pill">${esc(t.time)}</span>
       <span>
         <span class="s-title">${esc(t.title)}</span>
-        <span class="s-meta">${I(a.icon,11)} ${a.name}${t.meta?' — '+esc(t.meta):''}</span>
+        <span class="s-meta">${I(a.icon,11)} ${a.name}${t.meta?' — '+esc(t.meta):''}${dayBadge(t)}</span>
       </span>
       <span class="s-line"></span>
       <span class="s-pts">+${t.pts}</span>
@@ -875,13 +863,17 @@ function schedRowHTML(t){
     <button class="del-x" onclick="delTask(${t.id})" aria-label="delete task">${I('x',11)}</button>
     </div>`;
 }
+function taskIsToday(t){ return !t.days || t.days.length===0 || t.days.includes(TODAY_DOW); }
 function renderTasks(){
-  $('prioritySched').innerHTML = state.tasks.filter(t=>t.pri).map(schedRowHTML).join('') ||
-    '<div class="sched-row" style="border:none;color:var(--apres);font-size:13px">No focus tasks yet — add one with the + button and tick "today\u2019s focus".</div>';
-  $('taskSched').innerHTML = state.tasks.filter(t=>!t.pri).map(schedRowHTML).join('') ||
+  const managing = document.body.classList.contains('managing');
+  const visible = managing ? state.tasks : state.tasks.filter(taskIsToday);
+  $('prioritySched').innerHTML = visible.filter(t=>t.pri).map(schedRowHTML).join('') ||
+    '<div class="sched-row" style="border:none;color:var(--apres);font-size:13px">No focus tasks today — add one with the + button and tick "today\u2019s focus".</div>';
+  $('taskSched').innerHTML = visible.filter(t=>!t.pri).map(schedRowHTML).join('') ||
     '<div class="sched-row" style="border:none;color:var(--apres);font-size:13px">Nothing else today. Add a task with the + button.</div>';
-  const done = state.tasks.filter(t=>t.done).length;
-  $('taskCount').textContent = done + ' of ' + state.tasks.length + ' done';
+  const todays = state.tasks.filter(taskIsToday);
+  const done = todays.filter(t=>t.done).length;
+  $('taskCount').textContent = managing ? 'showing all days' : done + ' of ' + todays.length + ' done';
 }
 function toggleTask(id, ev){
   if(document.body.classList.contains('managing')) return;
@@ -1080,32 +1072,48 @@ function renderAreas(){
     </button>`;
   }).join('');
 }
+let currentAreaId = null;
 function openArea(k){
+  currentAreaId = k;
   const a = AREAS[k];
   const s = SW[a.sw];
   $('areaDetailBody').innerHTML = `
     <div class="ad-hero ${s.dark?'dark':''}" style="background:${s.bg}">
       ${I(a.icon,30)}
-      <h2>${a.name}</h2>
-      <p class="ad-vision">${a.vision}</p>
-      <span class="ad-phase-chip">${a.phase}</span>
+      <h2>${esc(a.name)}</h2>
+      <p class="ad-vision">${esc(a.vision)}</p>
+      <span class="ad-phase-chip">${esc(a.phase)}</span>
     </div>
     <div class="big-goal">
       <div class="bg-label">The big goal</div>
-      <div class="bg-text">${a.goal}</div>
+      <div class="bg-text">${esc(a.goal)}</div>
       <div class="bg-bar"><i style="width:${a.pct}%"></i></div>
-      <div class="bg-row"><span>${a.pct}% there</span><span>${a.goalNote}</span></div>
+      <div class="bg-row"><span>${a.pct}% there</span><span>${esc(a.goalNote)}</span></div>
     </div>
-    <div class="section-label">Milestones <span class="more">one at a time</span></div>
+    <div class="section-label">Milestones <span class="more">tap to tick</span><button class="manage-link" onclick="openModal('mile')">+ add</button><button class="manage-link" onclick="toggleManage()">edit</button></div>
     <div class="milestones card" style="margin:0 20px">
-      ${a.miles.map(m=>`
-        <div class="mile ${m.d?'done':''}">
+      ${a.miles.map((m,i)=>`
+        <div style="display:flex;align-items:center">
+        <button class="mile ${m.d?'done':''}" style="flex:1;text-align:left" onclick="toggleMile(${i})">
           <span class="m-dot"></span>
-          <span class="m-text">${m.t}</span>
-          <span class="m-when">${m.w}</span>
+          <span class="m-text">${esc(m.t)}</span>
+          <span class="m-when">${esc(m.w)}</span>
+        </button>
+        <button class="del-x" onclick="delMile(${i})" aria-label="delete milestone">${I('x',10)}</button>
         </div>`).join('')}
     </div>`;
   go('area-detail');
+}
+function toggleMile(i){
+  const a = AREAS[currentAreaId];
+  a.miles[i].d = !a.miles[i].d;
+  save(); openArea(currentAreaId);
+  if(a.miles[i].d) toast('<em>milestone down</em> — the big goal just got closer');
+}
+function delMile(i){
+  AREAS[currentAreaId].miles.splice(i,1);
+  save(); openArea(currentAreaId);
+  toast('<em>removed</em> milestone deleted');
 }
 function renderChallenges(){
   $('chalStack').innerHTML = state.challenges.map(c=>{
@@ -1159,20 +1167,48 @@ function delReward(id){
 /* ================= MODAL ================= */
 const AREA_OPTIONS = () => Object.entries(AREAS).map(([k,a])=>`<option value="${k}">${a.name}</option>`).join('');
 let pickedSw = 'arctic';
+let pickedDays = [];
 function openModal(kind){
   const box = $('modalBox');
   if(kind === 'task'){
+    pickedDays = [];
     box.innerHTML = `
       <h3>New <em>task</em></h3>
       <div class="m-field"><label>What</label><input type="text" id="mTitle" placeholder="e.g. Khan Academy — 30 min"></div>
       <div class="m-field"><label>Time</label><input type="text" id="mTime" placeholder="e.g. 4:00 pm"></div>
       <div class="m-field"><label>Life area</label><select id="mArea">${AREA_OPTIONS()}</select></div>
+      <div class="m-field"><label>Which days · leave blank for every day</label>
+        <div class="day-row">${['mon','tue','wed','thu','fri','sat','sun'].map(d=>
+          `<button class="day-tog" data-d="${d}" onclick="togDay(this)">${d[0].toUpperCase()+d[1]}</button>`).join('')}
+        </div></div>
       <div class="m-field"><label>Joy points</label><select id="mPts">
         <option value="5">5 — regular task</option><option value="15">15 — focus block</option><option value="25">25 — big rock</option></select></div>
       <div class="m-check"><input type="checkbox" id="mPri"><span>This is one of today's three focus tasks</span></div>
       <div class="m-actions">
         <button class="m-cancel" onclick="closeModal()">Cancel</button>
         <button class="m-save" onclick="saveTask()">Add task</button>
+      </div>`;
+  } else if(kind === 'area'){
+    const a = AREAS[currentAreaId];
+    box.innerHTML = `
+      <h3>Edit <em>${esc(a.name)}</em></h3>
+      <div class="m-field"><label>Vision</label><textarea id="mVision">${esc(a.vision)}</textarea></div>
+      <div class="m-field"><label>Current phase</label><input type="text" id="mPhase" value="${esc(a.phase)}"></div>
+      <div class="m-field"><label>The big goal</label><input type="text" id="mGoal" value="${esc(a.goal)}"></div>
+      <div class="m-field"><label>Goal note · the small print under the bar</label><input type="text" id="mGoalNote" value="${esc(a.goalNote)}"></div>
+      <div class="m-field"><label>Progress toward the big goal · percent</label><input type="number" id="mPct" min="0" max="100" value="${a.pct}"></div>
+      <div class="m-actions">
+        <button class="m-cancel" onclick="closeModal()">Cancel</button>
+        <button class="m-save" onclick="saveArea()">Save</button>
+      </div>`;
+  } else if(kind === 'mile'){
+    box.innerHTML = `
+      <h3>New <em>milestone</em></h3>
+      <div class="m-field"><label>The milestone</label><input type="text" id="mTitle" placeholder="e.g. Recipe #2 standardized"></div>
+      <div class="m-field"><label>When · free text</label><input type="text" id="mWhen" placeholder="e.g. Jul 15, or 'weekly'"></div>
+      <div class="m-actions">
+        <button class="m-cancel" onclick="closeModal()">Cancel</button>
+        <button class="m-save" onclick="saveMile()">Add</button>
       </div>`;
   } else if(kind === 'note'){
     pickedSw = 'arctic';
@@ -1229,11 +1265,34 @@ function pickSw(el){
   document.querySelectorAll('.sw-pick').forEach(b=>b.classList.toggle('on', b===el));
 }
 function closeModal(){ $('modalBack').classList.remove('open'); }
+function togDay(el){
+  const d = el.dataset.d;
+  if(pickedDays.includes(d)) pickedDays = pickedDays.filter(x=>x!==d);
+  else pickedDays.push(d);
+  el.classList.toggle('on', pickedDays.includes(d));
+}
+function saveArea(){
+  const a = AREAS[currentAreaId];
+  a.vision = $('mVision').value.trim() || a.vision;
+  a.phase = $('mPhase').value.trim() || a.phase;
+  a.goal = $('mGoal').value.trim() || a.goal;
+  a.goalNote = $('mGoalNote').value.trim();
+  a.pct = Math.max(0, Math.min(100, parseInt($('mPct').value) || 0));
+  save(); renderAreas(); openArea(currentAreaId); closeModal();
+  toast('<em>saved</em> area updated');
+}
+function saveMile(){
+  const t = $('mTitle').value.trim();
+  if(!t){ toast('<em>hold on</em> the milestone needs a name'); return; }
+  AREAS[currentAreaId].miles.push({t, w:$('mWhen').value.trim()||'—', d:false});
+  save(); openArea(currentAreaId); closeModal();
+  toast('<em>added</em> milestone on the board');
+}
 function saveTask(){
   const title = $('mTitle').value.trim();
   if(!title){ toast('<em>hold on</em> the task needs a name'); return; }
   state.tasks.push({id:Date.now(), area:$('mArea').value, time:$('mTime').value.trim()||'—',
-    title, meta:'', pts:parseInt($('mPts').value), done:false, pri:$('mPri').checked});
+    title, meta:'', pts:parseInt($('mPts').value), done:false, pri:$('mPri').checked, days:[...pickedDays]});
   save(); renderTasks(); closeModal();
   toast('<em>added</em> it\u2019s on the schedule');
 }
@@ -1290,7 +1349,8 @@ function restoreData(ev){
     try {
       const data = JSON.parse(reader.result);
       if(!data.tasks || !data.notes) throw new Error('bad file');
-      state = data;
+      state = migrate(data);
+      AREAS = state.areas;
       save(); initRender();
       toast('<em>restored</em> welcome back');
     } catch(e){ toast('<em>hmm</em> that file doesn\u2019t look like a backup'); }
@@ -1319,6 +1379,7 @@ $('ndBackBtn').innerHTML = I('chevL',18);
 $('ndShareBtn').innerHTML = I('arrowUp',16);
 $('adBackBtn').innerHTML = I('chevL',18);
 $('adEditBtn').innerHTML = I('edit',16);
+$('adEditBtn').onclick = () => openModal('area');
 $('fab').innerHTML = I('plus',22);
 renderNav('today');
 initRender();
